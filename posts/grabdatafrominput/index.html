@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Grabbing data from Inputs and Textareas (Edge/IE) | BrokenBrowser - Fun with browser vulnerabilities</title>
+<meta name="keywords" content="">
+<meta name="description" content="Both Microsoft Edge and Internet Explorer suffer from navigation problems, failing to keep up with the most updated history information. A framed navigation confuses these browsers and what seems to be a naive functionality problem ends up being a security bug: information disclosure across origins.
+Let’s first examine the functionality problem by building a page using just an &lt;iframe&gt;. Take a look at the code below: the iframe src points to first_page.">
+<meta name="author" content="magicmac">
+<link rel="canonical" href="/posts/grabdatafrominput/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.6a98292fb8fa8cf0f3ba4042d4b75515c04267550f3ad49ff6271b5af9562443.css" integrity="sha256-apgpL7j6jPDzukBC1LdVFcBCZ1UPOtSf9icbWvlWJEM=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="mask-icon" href="/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Grabbing data from Inputs and Textareas (Edge/IE)" />
+<meta property="og:description" content="Both Microsoft Edge and Internet Explorer suffer from navigation problems, failing to keep up with the most updated history information. A framed navigation confuses these browsers and what seems to be a naive functionality problem ends up being a security bug: information disclosure across origins.
+Let’s first examine the functionality problem by building a page using just an &lt;iframe&gt;. Take a look at the code below: the iframe src points to first_page." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/grabdatafrominput/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2016-08-28T23:49:33-03:00" />
+<meta property="article:modified_time" content="2016-08-28T23:49:33-03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Grabbing data from Inputs and Textareas (Edge/IE)"/>
+<meta name="twitter:description" content="Both Microsoft Edge and Internet Explorer suffer from navigation problems, failing to keep up with the most updated history information. A framed navigation confuses these browsers and what seems to be a naive functionality problem ends up being a security bug: information disclosure across origins.
+Let’s first examine the functionality problem by building a page using just an &lt;iframe&gt;. Take a look at the code below: the iframe src points to first_page."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "/posts/"
+    }
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Grabbing data from Inputs and Textareas (Edge/IE)",
+      "item": "/posts/grabdatafrominput/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Grabbing data from Inputs and Textareas (Edge/IE)",
+  "name": "Grabbing data from Inputs and Textareas (Edge\/IE)",
+  "description": "Both Microsoft Edge and Internet Explorer suffer from navigation problems, failing to keep up with the most updated history information. A framed navigation confuses these browsers and what seems to be a naive functionality problem ends up being a security bug: information disclosure across origins.\nLet’s first examine the functionality problem by building a page using just an \u0026lt;iframe\u0026gt;. Take a look at the code below: the iframe src points to first_page.",
+  "keywords": [
+    
+  ],
+  "articleBody": "Both Microsoft Edge and Internet Explorer suffer from navigation problems, failing to keep up with the most updated history information. A framed navigation confuses these browsers and what seems to be a naive functionality problem ends up being a security bug: information disclosure across origins.\nLet’s first examine the functionality problem by building a page using just an . Take a look at the code below: the iframe src points to first_page.html but it navigates to second_page.html when clicking on the button.\nThe browser will render first_page.html in the iframe, and by clicking on the button its location will change to second_page.html. So let’s imagine that we have clicked and it points now to the second page.\nWhat would be the source of the iframe if we move away from the main page and return back? Which content should be loaded in the iframe, the first or the second page? Pause for a second and think: the original source points to first_page, however, we changed its location and moved away from the main page. But we are back.\nNavigated the iframe. Navigated the top window. Clicked on the back button of the browser. The answer, as expected, is that all browsers will point to its most recent location in history: second_page.html. [ Try it Live ]\nAt this point everything works as expected, but we will dynamically insert an HTML element into the DOM of the main page and see it failing to properly navigate. We will use a but any tag is fine as long as we force the browser to render something before the iframe.\nThe result is different now: Edge overrides the latest location with the one in the src attribute of the iframe. In other words, the browser will load the original location of the iframe instead of the latest navigated one. [ Try it Live ]\nEdge is replacing the last navigated location with the SRC attribute of the original iframe. To validate this, we can navigate the iframe several times and click on back to see where it goes. In the video below we can see a demo navigating 4 pages (1, 2, 3, 4) in the iframe and then navigating the top. Then we click on the back button only to see that the browser replaced the latest navigated page with the original location of the iframe.\nThe navigation history of the four pages looks like this: [1, 2, 3, 4] but after clicking the back button, the last location is replaced, like this [1, 3, 2, 1].\n[ Try it Live ] You might be asking at this point what is the problem with this functionality bug, right? Here’s the issue, all modern browsers have a feature that make our lives easier: they “remember” what we’ve typed during our navigation in all the sites as long as we keep the tab opened. So, if we go to a website and type anything inside an input box, no matter how many times we go forward or backward, the browser will remember our typed data and paste it properly into each page. Keep in mind that the original page inputs were probably empty so when going back and forth, the browser has to place that information back in to give us the illusion that nothing changed.\nIf we add up this feature with the navigation problem described above, we can fool the browser and make it “remember” (paste) the typed information in the wrong place. It’s actually pretty simple: build a webpage with an input box of the similar type of the site that we want to grab the text. In other words, we should emulate what the original page had so the browser can paste it comfortably. But no worries, this is quite easy. Let’s go to bing.com and see what’s the type of the search box input tag. Using the DOM inspector we can do it in a second.\n// File: index.html // Once the user types something, we navigate the top-page and come back. // File: input.html The input box below will be automatically completed by Edge Have a great day, fellow bug hunter! Remember that persistence and passion are key. If you want work on this issue, grab the files from here.\nQuestions? Message me on Twitter @magicmac2000\nUpdate (2016-09-05): the question from Jun made me think a bit, and now we have a shorter PoC which does not require us to go back and forth but just a reload. Still, I haven’t tried this without iframes. It might be possible using a pushState/replaceState plus a server redirect but we need to play a bit more. If you are particularly interested on getting a non-framed PoC let me know and I’ll do my best to find a way to get it.\n",
+  "wordCount" : "917",
+  "inLanguage": "en",
+  "datePublished": "2016-08-28T23:49:33-03:00",
+  "dateModified": "2016-08-28T23:49:33-03:00",
+  "author":{
+    "@type": "Person",
+    "name": "magicmac"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/posts/grabdatafrominput/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "BrokenBrowser - Fun with browser vulnerabilities",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="/" accesskey="h" title="BrokenBrowser - Fun with browser vulnerabilities (Alt + H)">BrokenBrowser - Fun with browser vulnerabilities</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Grabbing data from Inputs and Textareas (Edge/IE)
+    </h1>
+    <div class="post-meta"><span title='2016-08-28 23:49:33 -0300 -03'>August 28, 2016</span>&nbsp;·&nbsp;magicmac
+
+</div>
+  </header> 
+  <div class="post-content"><p>Both Microsoft Edge and Internet Explorer suffer from navigation problems, failing to keep up with the most updated history information. A framed navigation confuses these browsers and what seems to be a naive functionality problem ends up being a security bug: information disclosure across origins.</p>
+<p>Let’s first examine the functionality problem by building a page using just an <strong>&lt;iframe&gt;.</strong> Take a look at the code below: the iframe src points to <em>first_page.html</em> but it navigates to <em>second_page.html</em> when clicking on the button.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 whitespace-before:1 whitespace-after:1 lang:xhtml decode:true&#34; title=&#34;Changing the location of the iFrame&#34;&gt;&lt;iframe src=&#34;first_page.html&#34;&gt;&lt;/iframe&gt;
+
+&lt;input onclick=&#34;navigateIFrame()&#34; value=&#34;Navigate IFrame&#34; type=&#34;button&#34;/&gt;
+
+&lt;script&gt;
+function navigateIFrame()
+{
+   window[0].location.href = &#34;second_page.html&#34;;
+}
+&lt;/script&gt;
+</code></pre><p>The browser will render <em>first_page.html</em> in the iframe, and by clicking on the button its location will change to <em>second_page.html</em>. So let’s imagine that we have clicked and it points now to the second page.</p>
+<p>What would be the source of the iframe if we move away from the main page and return back? Which content should be loaded in the iframe, the first or the second page? Pause for a second and think: the original source points to first_page, however, we changed its location and moved away from the main page. But we are back.</p>
+<ol>
+<li>Navigated the iframe.</li>
+<li>Navigated the top window.</li>
+<li>Clicked on the back button of the browser.</li>
+</ol>
+<p>The answer, as expected, is that all browsers will point to its most recent location in history: second_page.html. [ <a href="http://www.cracking.com.ar/demos/grabdatafrominput/01">Try it Live</a> ]</p>
+<!-- raw HTML omitted -->
+<p>At this point everything works as expected, but we will dynamically insert an HTML element into the DOM of the main page and see it failing to properly navigate. We will use a <strong>&lt;br /&gt;</strong> but any tag is fine as long as we force the browser to render something <em>before</em> the iframe.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 whitespace-before:1 whitespace-after:1 lang:xhtml decode:true&#34; title=&#34;Changing the location of the iFrame&#34;&gt;&lt;iframe src=&#34;first_page.html&#34;&gt;&lt;/iframe&gt;
+
+&lt;input onclick=&#34;navigateIFrame()&#34; value=&#34;Navigate IFrame&#34; type=&#34;button&#34;/&gt;
+
+&lt;script&gt;
+function navigateIFrame()
+{
+   window[0].location.href = &#34;second_page.html&#34;;
+}
+
+// Inject HTML element in the DOM to &#34;confuse&#34; IE/Edge.
+document.body.insertAdjacentHTML (&#39;afterBegin&#39;, &#39;&lt;br /&gt;&#39;);
+&lt;/script&gt;
+</code></pre><p>The result is different now: Edge overrides the latest location with the one in the src attribute of the iframe. In other words, the browser will load the original location of the iframe instead of the latest navigated one. [ <a href="http://www.cracking.com.ar/demos/grabdatafrominput/02">Try it Live</a> ]</p>
+<!-- raw HTML omitted -->
+<p>Edge is replacing the last navigated location with the SRC attribute of the original iframe. To validate this, we can navigate the iframe several times and click on back to see where it goes. In the video below we can see a demo navigating 4 pages (1, 2, 3, 4) in the iframe and then navigating the top. Then we click on the back button only to see that the browser replaced the latest navigated page with the original location of the iframe.</p>
+<p>The navigation history of the four pages looks like this: [1, 2, 3, <strong>4</strong>] but after clicking the back button, the last location is replaced, like this [1, 3, 2, <strong>1</strong>].</p>
+<p>[ <a href="http://www.cracking.com.ar/demos/grabdatafrominput/03">Try it Live</a> ] <!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+<p>You might be asking at this point what is the problem with this functionality bug, right? Here’s the issue, all modern browsers have a feature that make our lives easier: they “remember” what we’ve typed during our navigation in all the sites as long as we keep the tab opened. So, if we go to a website and type anything inside an input box, no matter how many times we go forward or backward, the browser will remember our typed data and paste it <!-- raw HTML omitted -->properly<!-- raw HTML omitted --> into each page. Keep in mind that the original page inputs were probably empty so when going back and forth, the browser has to place that information back in to give us the illusion that nothing changed.</p>
+<p>If we add up this feature with the navigation problem described above, we can fool the browser and make it “remember” (paste) the typed information in the wrong place. It’s actually pretty simple: build a webpage with an input box of the similar type of the site that we want to grab the text. In other words, we should emulate what the original page had so the browser can paste it comfortably. But no worries, this is quite easy. Let’s go to bing.com and see what’s the type of the search box input tag. Using the DOM inspector we can do it in a second.</p>
+<!-- raw HTML omitted -->
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 whitespace-after:1 lang:xhtml decode:true&#34; title=&#34;Changing the location of the iFrame&#34;&gt;// File: index.html
+
+&lt;iframe src=&#34;input.html&#34;&gt;&lt;/iframe&gt;
+&lt;script&gt;
+   window[0].location.href = &#34;http://www.bing.com&#34;;
+&lt;/script&gt;
+
+// Once the user types something, we navigate the top-page and come back.
+</code></pre><pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 whitespace-after:1 lang:xhtml decode:true &#34; title=&#34;Changing the location of the iFrame&#34;&gt;// File: input.html
+
+The input box below will be automatically completed by Edge
+&lt;input type=&#34;search&#34; id=&#34;box&#34; /&gt;
+&lt;script&gt;
+   alert(&#34;Your search in Bing was: &#34; + box.value);
+&lt;/script&gt;
+</code></pre><!-- raw HTML omitted -->
+<p>Have a great day, fellow bug hunter! Remember that persistence and passion are key. If you want work on this issue, grab the files <a href="http://goo.gl/76e8fc">from here</a>.</p>
+<p>Questions? Message me on Twitter <a href="https://twitter.com/magicmac2000">@magicmac2000</a></p>
+<p><!-- raw HTML omitted -->Update (2016-09-05)<!-- raw HTML omitted -->: <a href="https://twitter.com/shhnjk/status/772749660242976768">the question from Jun</a> made me think a bit, and now <a href="http://www.cracking.com.ar/demos/grabdatafrominput/05/">we have a shorter PoC</a> which does not require us to go back and forth but just a reload. Still, I haven’t tried this without iframes. It might be possible using a pushState/replaceState plus a server redirect but we need to play a bit more. If you are particularly interested on getting a non-framed PoC let me know and I’ll do my best to find a way to get it.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="/">BrokenBrowser - Fun with browser vulnerabilities</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

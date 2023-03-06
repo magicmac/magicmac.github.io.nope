@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>SOP bypass / UXSS - Adventures in a Domainless World (Edge) | BrokenBrowser - Fun with browser vulnerabilities</title>
+<meta name="keywords" content="">
+<meta name="description" content="Today we are going to walk around a few design issues that, when used together, will end up in a full SOP bypass or Universal Cross Site Scripting (UXSS) on Microsoft Edge. If you are not a security researcher but you still want to understand this vulnerability, think about it this way: visiting a malicious webpage an attacker will be able to read the cookies of your fav sites, change the content on the fly (on the client), sometimes even get personal information like saved usernames/passwords.">
+<meta name="author" content="magicmac">
+<link rel="canonical" href="/posts/uxss-edge-domainless-world/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.6a98292fb8fa8cf0f3ba4042d4b75515c04267550f3ad49ff6271b5af9562443.css" integrity="sha256-apgpL7j6jPDzukBC1LdVFcBCZ1UPOtSf9icbWvlWJEM=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="mask-icon" href="/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="SOP bypass / UXSS - Adventures in a Domainless World (Edge)" />
+<meta property="og:description" content="Today we are going to walk around a few design issues that, when used together, will end up in a full SOP bypass or Universal Cross Site Scripting (UXSS) on Microsoft Edge. If you are not a security researcher but you still want to understand this vulnerability, think about it this way: visiting a malicious webpage an attacker will be able to read the cookies of your fav sites, change the content on the fly (on the client), sometimes even get personal information like saved usernames/passwords." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/uxss-edge-domainless-world/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2016-12-13T12:56:37-03:00" />
+<meta property="article:modified_time" content="2016-12-13T12:56:37-03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="SOP bypass / UXSS - Adventures in a Domainless World (Edge)"/>
+<meta name="twitter:description" content="Today we are going to walk around a few design issues that, when used together, will end up in a full SOP bypass or Universal Cross Site Scripting (UXSS) on Microsoft Edge. If you are not a security researcher but you still want to understand this vulnerability, think about it this way: visiting a malicious webpage an attacker will be able to read the cookies of your fav sites, change the content on the fly (on the client), sometimes even get personal information like saved usernames/passwords."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "/posts/"
+    }
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "SOP bypass / UXSS - Adventures in a Domainless World (Edge)",
+      "item": "/posts/uxss-edge-domainless-world/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "SOP bypass / UXSS - Adventures in a Domainless World (Edge)",
+  "name": "SOP bypass \/ UXSS - Adventures in a Domainless World (Edge)",
+  "description": "Today we are going to walk around a few design issues that, when used together, will end up in a full SOP bypass or Universal Cross Site Scripting (UXSS) on Microsoft Edge. If you are not a security researcher but you still want to understand this vulnerability, think about it this way: visiting a malicious webpage an attacker will be able to read the cookies of your fav sites, change the content on the fly (on the client), sometimes even get personal information like saved usernames/passwords.",
+  "keywords": [
+    
+  ],
+  "articleBody": "Today we are going to walk around a few design issues that, when used together, will end up in a full SOP bypass or Universal Cross Site Scripting (UXSS) on Microsoft Edge. If you are not a security researcher but you still want to understand this vulnerability, think about it this way: visiting a malicious webpage an attacker will be able to read the cookies of your fav sites, change the content on the fly (on the client), sometimes even get personal information like saved usernames/passwords. Also, because Microsoft Edge uses protected internal resources to do special things, an attacker can potentially access those resources and probably set Edge configuration flags, open IE, etc.\nHere we have a video exposing bing cookies and another video showing the content of nature.com. But keep in mind that those sites have no problems at all: the vulnerability is exclusively from Microsoft Edge browser. Let’s see how it’s done!\nDomainless World The about:blank is a very special URL that sometimes gets confused and it does not know where it belongs to. Think about it: if we are in www.magicmac.com/dom/index.html the document.domain is obviously www.magicmac.com, but what would be the domain of about:blank? It depends. In theory it should match the domain of its referrer, the webpage that set its URL. For example, if we are in www.magicmac.com and we click on an about:blank link, then, this particular about:blank will have www.magicmac.com as its domain.\nAnother example could be an iframe with its source pointing to about:blank explicitly, or without a source at all (the browser defaults it to about:blank).\nSo, an about:blank loaded from goodfellas.com looks similar to one from evil.com because both URLs are the same, but they have a different document.domain so they cannot access each other. But let me ask you a question: what would be the domain of an about:blank that we’ve manually typed into the address bar? Got you! The answer is important, so I’ll zoom-in DevTools a bit.\nIt’s empty and it has a tremendous power as we will see in a bit, but just to be sure we are on the same page, let’s call URLs without a domain “domainless” and “domained” to the ones that have a document.domain.\nBug hunter, what follows is the most important thing you will read in this post.\n“A domainless about:blank is capable of accessing any domained about:blank” In other words, a domainless about:blank can access a domained about:blank without restrictions. Let’s cheat here for a moment and quickly add a bing.com iframe into this page, straight from the debug console.\ndocument.body.innerHTML = '' Great! We have now a framed bing.com inside a top domainless blank, but our goal is to find a blank iframe inside bing because as we said, a domainless blank (main window here) will be able to access any domained blank (a blank iframe inside bing.com)\nIn this case it will be easy because we are using bing.com already has blank iframes. But let’s get the taste of it anyway! Even from the debugger, the next instruction would normally return an access denied, but because the top is domainless, it will work. Let see!\nwindow[0][0].location.href = \"javascript:alert(parent.document.domain)\"; Bang! I know this is not impressing you because we are working from DevTools, right? But for me, it’s the most important thing that we’ve done because if we grasp this concept, then, finding new UXSSs will be to some extent, easy. From now on, every time we find a way to access a domainless blank (generally about:blank, but we can use others as well), we will have a UXSS. We are working with DevTools because I want to make sure that we completely understand what we are doing, but of course we don’t need it!\nStand-Alone PoC. No DevTools Required Let’s do it for real now. We need to find a way to create a domainless site accessible from a regular webpage, and the quicker way to do it is with a data: URI instead of an about:blank. Same thing, just a different protocol. However, if we load a data: uri inside an iframe, its domain will be the same as its referrer domain (just as we’ve seen at the beginning with the about:blank), and if we attempt to load a data: uri on top, Edge will refuse sending us to an error page.\nHowever, there are several tricks that we can do to get our domainless data: uri, and today we are going to explore the Flash version because it is extremely simple. In fact, I’ve been using this flash since 2005 without changes, it only sets a URL from its query-string. Grab it an use it!\nSee? Just add the URL you want to load in the redir param and it’s done. In this case we are using a data: uri which ends up being loaded in the top, domainless. Also, to fool Edge we need to load the swf inside an iframe, otherwise it won’t work (error page). Try it and see for yourself!\nBy the way, don’t forget that we can find alternatives to achieve the same thing. We just happen to use this because it’s the first that we found, and Adobe guys will probably blacklist the data: uri helping my friends @Edge to get rid of this bug. However, there are many ways to achieve the same thing without the flash file. Make the idea yours, and find your way!\nOK, now that we are in a domainless window we can inject an iframe pointing to bing.com, but Edge is in a state that doesn’t render elements correctly. If we try to use createElement/insertAdjacentHtml/etc it will fail. I mean, Edge will draw a dead iframe just like a car without an engine: it simply does not work. To overcome this problem we will document.write ourselves, forcing the browser to render everything again. And because we are in a domainless URL, the document.write will keep us exactly in the same location/domain.\ndocument.write(''); Perfect! Now we can access bing’s blank iframe, but remember we’ve been lucky because not all sites will have “free blank iframes” inside.\nwindow[0][0].location.href = \"javascript:alert(parent.document.cookie)\"; [ Click here to see the PoC ] Update: [ Patched – CVE-2017-0002 ]\nI’m getting excited, this is working without DevTools! Oh no, I know what you are thinking now, skeptic bug hunter: Bing is serving us a couple of blank iframes in a silver platter, so this was easy! And you are right, but I was just celebrating a bit! From now on I will call you killjoy! No more “bug hunter”. 🙂\nLet’s continue, killjoy. I know that sites won’t like the idea of placing blank iframes for us, so we need to find our way.\nOwning non-cooperative sites Imagine that we are in the second step where the top is a domainless data: and our iframe is correctly rendered but pointing to nature.com instead of bing.com (because nature has a non-blank iframe inside). If we try to change the location of that iframe Edge will refuse and open a new window instead. In other words, doing something like this won’t help.\n// We are inside a domainless data: so Edge will open a new // window instead of changing nature-iframe's location window[0][0].location.href = \"about:blank\"; That won’t work. Maybe it can be bypassed but I haven’t tried enough. It’s a problem that happens in this domainless situation, so, we can just open a new window with a real URL and work from there. This is exactly what we will do:\nOpen a new window with a framed nature.com inside.\n[ NOW WE ARE INSIDE THE NEW WINDOW WITH A REGULAR URL ] Change nature’s inner-iframe location to about:blank so we can give it a name. Yes, we want the iframe to have a name. Set a name to the about:blank iframe so our domainless opener can access it via window.open. Don’t forget that we are right now inside a window with a regular URL, it’s our opener who has the power. We will name this iframe just like this: window.name = “DAVID_COPPERFIELD” honoring the magician who continues learning and working with passion. Now we should change the location of the about:blank (which belongs to our domain) to the one of nature. To do it, we will change the location using a meta-refresh to about:blank. Easy. That trick makes sure the about:blank recovers the domain of its parent. Let the opener know that everything’s ready so it can access, just like this: window.open(“javascript:alert(document.domain)”, “DAVID_COPPERFIELD”); [ Click here to see the PoC ] Update: [ Patched – CVE-2017-0002 ]\nEnjoy again, but this time jumping and screaming around the house. Yes! Yes! Oopss, my wife is asking me what I found now. She knows what those screams mean. 😉\nMr killjoy, we made it again. The PoCs are interactive so we can learn in real time what we are doing, but please, go over them and read the specific details of the code. I’m sure there’s room for improvement, and if you make these ideas yours it’s highly likely that you will find variations to achieve similar things and more. Research, study, learn! It’s fun.\nCan you find your own way to set a domainless URL without a Flash? Yes you can. Also, just with the code that we explored together here, we can create other UXSS scenarios like being inside an iframe that accesses its top. Is that possible? Let’s say we are a banner-ad inside an iframe rendered by Facebook. Is it possible to access our top, and get -for example- the list of a user’s friends? Of course! What about accessing XFO sites that don’t like to be framed? Is the iframe the only element capable of rendering HTML? Last, what about sites that do not have iframes at all? I give you my word, we can even access those ones twisting this code a bit. Sit down and explore! Here you have the needed files.\nHave a nice day!\nManuel.\n",
+  "wordCount" : "1742",
+  "inLanguage": "en",
+  "datePublished": "2016-12-13T12:56:37-03:00",
+  "dateModified": "2016-12-13T12:56:37-03:00",
+  "author":{
+    "@type": "Person",
+    "name": "magicmac"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/posts/uxss-edge-domainless-world/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "BrokenBrowser - Fun with browser vulnerabilities",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="/" accesskey="h" title="BrokenBrowser - Fun with browser vulnerabilities (Alt + H)">BrokenBrowser - Fun with browser vulnerabilities</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      SOP bypass / UXSS - Adventures in a Domainless World (Edge)
+    </h1>
+    <div class="post-meta"><span title='2016-12-13 12:56:37 -0300 -03'>December 13, 2016</span>&nbsp;·&nbsp;magicmac
+
+</div>
+  </header> 
+  <div class="post-content"><p>Today we are going to walk around a few design issues that, when used together, will end up in a <strong>full SOP bypass</strong> or <strong>Universal Cross Site Scripting</strong> (UXSS) on Microsoft Edge. If you are not a security researcher but you still want to understand this vulnerability, think about it this way: visiting a malicious webpage an attacker will be able to read the cookies of your fav sites, change the content on the fly (on the client), sometimes even get personal information like saved usernames/passwords. Also, because Microsoft Edge uses protected <a href="https://www.brokenbrowser.com/spoof-addressbar-malware/">internal resources</a> to do special things, an attacker can potentially access those resources and probably set Edge configuration flags, open IE, etc.</p>
+<p>Here we have <a href="https://www.youtube.com/watch?v=I-tVxMXgTiQ">a video exposing bing cookies</a> and <a href="https://www.youtube.com/watch?v=5hcOvBvB1JE">another video showing the content of nature.com</a>. But keep in mind that those sites have no problems at all: the vulnerability is exclusively from Microsoft Edge browser. Let’s see how it’s done!</p>
+<h2 id="domainless-world">Domainless World<a hidden class="anchor" aria-hidden="true" href="#domainless-world">#</a></h2>
+<p>The about:blank is a very special URL that sometimes gets confused and it does not know where it belongs to. Think about it: if we are in <strong><a href="https://www.magicmac.com/dom/index.html">www.magicmac.com/dom/index.html</a></strong> the document.domain is obviously <strong><a href="https://www.magicmac.com">www.magicmac.com</a></strong>, but what would be the domain of about:blank? It depends. In theory it should match the domain of its referrer, the webpage that set its URL. For example, if we are in <a href="https://www.magicmac.com">www.magicmac.com</a> and we click on an about:blank link, then, this particular about:blank will have <a href="https://www.magicmac.com">www.magicmac.com</a> as its domain.</p>
+<p><a href="/wp-content/uploads/2016/12/01-about-blank-page.png" title="about:blank navigation"><img loading="lazy" src="/2016/12/01-about-blank-page.png" alt=""  />
+</a>Another example could be an iframe with its source pointing to about:blank explicitly, or without a source at all (the browser defaults it to about:blank).</p>
+<p><a href="/wp-content/uploads/2016/12/02-about-blank-iframe.png" title="about:blank iframe"><img loading="lazy" src="/2016/12/02-about-blank-iframe.png" alt=""  />
+</a>So, an about:blank loaded from goodfellas.com looks similar to one from evil.com because both URLs are the same, but they have a different document.domain so <strong>they cannot access each other</strong>. But let me ask you a question: what would be the domain of an about:blank that we’ve manually typed into the address bar? Got you! The answer is important, so I’ll zoom-in DevTools a bit.</p>
+<p><a href="/wp-content/uploads/2016/12/03-about-blank-domainless.png" title="about:blank domainless"><img loading="lazy" src="/2016/12/03-about-blank-domainless.png" alt=""  />
+</a>It’s empty and it has a tremendous power as we will see in a bit, but just to be sure we are on the same page, let’s call URLs without a domain “domainless” and “domained” to the ones that have a document.domain.</p>
+<p>Bug hunter, what follows is the most important thing you will read in this post.</p>
+<h2 id="a-domainless-aboutblank-is-capable-of-accessing-any-domained-aboutblank">“A domainless about:blank is capable of accessing any domained about:blank”<a hidden class="anchor" aria-hidden="true" href="#a-domainless-aboutblank-is-capable-of-accessing-any-domained-aboutblank">#</a></h2>
+<p>In other words, a domainless about:blank can access a domained about:blank without restrictions. Let’s cheat here for a moment and quickly add a bing.com iframe into this page, straight from the debug console.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Adding Bing&#39;s iframe&#34;&gt;document.body.innerHTML = &#39;&lt;iframe src=&#34;http://www.bing.com/images/search?q=microsoft+edge&#34;&gt;&lt;/iframe&gt;&#39;
+</code></pre><p><a href="/wp-content/uploads/2016/12/04-injected-bing-devtools.png" title="Injected Bing"><img loading="lazy" src="/2016/12/04-injected-bing-devtools.png" alt=""  />
+</a>Great! We have now a framed bing.com inside a top domainless blank, but our goal is to <!-- raw HTML omitted -->find a blank iframe inside bing<!-- raw HTML omitted --> because as we said, a domainless blank (main window here) will be able to access any domained blank (a blank iframe inside bing.com)</p>
+<p>In this case it will be easy because we are using bing.com already has blank iframes. But let’s get the taste of it anyway! Even from the debugger, the next instruction would normally return an access denied, but because the top is domainless, it will work. Let see!</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Adding Bing&#39;s iframe&#34;&gt;window[0][0].location.href = &#34;javascript:alert(parent.document.domain)&#34;;
+</code></pre><p><a href="/wp-content/uploads/2016/12/05-injectscript-bing.png" title="Injected Script in Bing"><img loading="lazy" src="/2016/12/05-injectscript-bing.png" alt=""  />
+</a>Bang! I know this is not impressing you because we are working from DevTools, right? But for me, it’s the most important thing that we’ve done because if we grasp this concept, then, finding new UXSSs will be <em>to some extent</em>, easy. From now on, every time we find a way to access a domainless blank (generally about:blank, but we can use others as well), we will have a UXSS. We are working with DevTools because I want to make sure that we completely understand what we are doing, but of course we don’t need it!</p>
+<h2 id="stand-alone-poc-no-devtools-required">Stand-Alone PoC. No DevTools Required<a hidden class="anchor" aria-hidden="true" href="#stand-alone-poc-no-devtools-required">#</a></h2>
+<p>Let’s do it for real now. We need to find a way to create a domainless site accessible from a regular webpage, and the quicker way to do it is with a data: URI instead of an about:blank. Same thing, just a different protocol. However, if we load a data: uri inside an iframe, its domain will be the same as its referrer domain (just as we’ve seen at the beginning with the about:blank), and if we attempt to load a data: uri on top, Edge will refuse sending us to an error page.</p>
+<p>However, there are several tricks that we can do to get our domainless data: uri, and today we are going to explore the Flash version because it is extremely simple. In fact, I’ve been using this flash since 2005 without changes, it only sets a URL from its query-string. Grab it an use it!</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:xhtml decode:true&#34; title=&#34;Adding Bing&#39;s iframe&#34;&gt;&lt;iframe src=&#34;geturl.swf?target=_top&amp;redir=data:,[html/script goes here]&#34;&gt;&lt;/iframe&gt;
+</code></pre><p>See? Just add the URL you want to load in the <strong>redir</strong> param and it’s done. In this case we are using a data: uri which ends up being loaded in the top, domainless. Also, to fool Edge we need to load the swf inside an iframe, otherwise it won’t work (error page). Try it and see for yourself!</p>
+<p>By the way, don’t forget that we can find alternatives to achieve the same thing. We just happen to use this because it’s the first that we found, and Adobe guys will probably blacklist the data: uri <a href="https://www.brokenbrowser.com/on-patching-security-bugs/">helping my friends @Edge to get rid of this bug</a>. However, there are many ways to achieve the same thing without the flash file. Make the idea yours, and find your way!</p>
+<p>OK, now that we are in a domainless window we can inject an iframe pointing to bing.com, but Edge is in a state that doesn’t render elements correctly. If we try to use createElement/insertAdjacentHtml/etc it will fail. I mean, Edge will draw a dead iframe just like a car without an engine: it simply does not work. To overcome this problem we will document.write ourselves, forcing the browser to render everything again. And because we are in a domainless URL, the document.write will keep us exactly in the same location/domain.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Wrting Bing&#39;s iframe correctly&#34;&gt;document.write(&#39;&lt;iframe src=&#34;http://www.bing.com/images&#34;&gt;&lt;/iframe&gt;&#39;);
+</code></pre><p>Perfect! Now we can access bing’s blank iframe, but remember we’ve been lucky because not all sites will have “free blank iframes” inside.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;JavaScript in Bing&#34;&gt;window[0][0].location.href = &#34;javascript:alert(parent.document.cookie)&#34;;
+</code></pre><h2 id="20161206-bing-easypngwp-contentuploads20161206-bing-easypng-uxss-on-bing-easy-click-here-to-see-the-poc-httpunsafecrackingcomardemosedge-domainless-uxssbingindexhtml"><a href="/wp-content/uploads/2016/12/06-bing-easy.png" title="UXSS on Bing (easy)"><img loading="lazy" src="/2016/12/06-bing-easy.png" alt=""  />
+</a><a href="http://unsafe.cracking.com.ar/demos/edge-domainless-uxss/bing/index.html">[ Click here to see the PoC ]</a></h2>
+<p>Update: [ <a href="http://www.cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-0002">Patched – CVE-2017-0002</a> ]</p>
+<p>I’m getting excited, this is working without DevTools! Oh no, I know what you are thinking now, skeptic bug hunter: Bing is serving us a couple of blank iframes in a silver platter, so this was easy! And you are right, but I was just celebrating a bit! From now on I will call you killjoy! No more “bug hunter”. 🙂</p>
+<p>Let’s continue, killjoy. I know that sites won’t like the idea of placing blank iframes for us, so we need to find our way.</p>
+<h2 id="owning-non-cooperative-sites">Owning non-cooperative sites<a hidden class="anchor" aria-hidden="true" href="#owning-non-cooperative-sites">#</a></h2>
+<p>Imagine that we are in the second step where the top is a domainless data: and our iframe is correctly rendered but pointing to nature.com instead of bing.com (because nature has a non-blank iframe inside). If we try to change the location of that iframe Edge will refuse and open a new window instead. In other words, doing something like this won’t help.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;JavaScript in Bing&#34;&gt;// We are inside a domainless data: so Edge will open a new
+// window instead of changing nature-iframe&#39;s location
+window[0][0].location.href = &#34;about:blank&#34;;
+</code></pre><p>That won’t work. Maybe it can be bypassed but I haven’t tried enough. It’s a problem that happens in this domainless situation, so, we can just open a new window with a real URL and work from there. This is exactly what we will do:</p>
+<ol>
+<li>Open a new window with a framed nature.com inside.<br>
+[ NOW WE ARE INSIDE THE NEW WINDOW WITH A REGULAR URL ]</li>
+<li>Change nature’s inner-iframe location to about:blank so we can give it a name. Yes, we want the iframe to have a name.</li>
+<li>Set a name to the about:blank iframe so our domainless opener can access it via window.open. Don’t forget that we are right now inside a window with a regular URL, it’s our opener who has the power. We will name this iframe just like this: window.name = “DAVID_COPPERFIELD” honoring the magician who continues learning and working with passion.</li>
+<li>Now we should change the location of the about:blank (which belongs to our domain) to the one of nature. To do it, we will change the location using a meta-refresh to about:blank. Easy. That trick makes sure the about:blank recovers the domain of its parent.</li>
+<li>Let the opener know that everything’s ready so it can access, just like this: window.open(“javascript:alert(document.domain)”, “DAVID_COPPERFIELD”);</li>
+</ol>
+<h2 id="20161207-nature-hardpngwp-contentuploads20161207-nature-hardpng-uxss-on-nature-click-here-to-see-the-poc-httpunsafecrackingcomardemosedge-domainless-uxssnatureindexhtml"><a href="/wp-content/uploads/2016/12/07-nature-hard.png" title="UXSS on Nature"><img loading="lazy" src="/2016/12/07-nature-hard.png" alt=""  />
+</a><a href="http://unsafe.cracking.com.ar/demos/edge-domainless-uxss/nature/index.html">[ Click here to see the PoC ]</a></h2>
+<p>Update: [ <a href="http://www.cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-0002">Patched – CVE-2017-0002</a> ]</p>
+<p>Enjoy again, but this time jumping and screaming around the house. Yes! Yes! Oopss, my wife is asking me what I found now. She knows what those screams mean. 😉</p>
+<p>Mr killjoy, we made it again. The PoCs are interactive so we can learn in real time what we are doing, but please, go over them and read the specific details of the code. I’m sure there’s room for improvement, and if you make these ideas yours it’s highly likely that you will find variations to achieve similar things and more. Research, study, learn! It’s fun.</p>
+<p>Can you find your own way to set a domainless URL without a Flash? Yes you can. Also, just with the code that we explored together here, we can create other UXSS scenarios like being inside an iframe that accesses its top. Is that possible? Let’s say we are a banner-ad inside an iframe rendered by Facebook. Is it possible to access our top, and get -for example- the list of a user’s friends? Of course! What about accessing XFO sites that don’t like to be framed? Is the iframe the only element capable of rendering HTML? Last, what about sites that <strong>do not</strong> have iframes at all? I give you my word, we can even access those ones twisting this code a bit. Sit down and explore! <a href="https://goo.gl/a1cvXI">Here you have the needed files</a>.</p>
+<p>Have a nice day!<br>
+<a href="https://twitter.com/magicmac2000">Manuel.</a></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="/">BrokenBrowser - Fun with browser vulnerabilities</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Posts | BrokenBrowser - Fun with browser vulnerabilities</title>
+<meta name="keywords" content="">
+<meta name="description" content="Posts - BrokenBrowser - Fun with browser vulnerabilities">
+<meta name="author" content="">
+<link rel="canonical" href="/posts/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.6a98292fb8fa8cf0f3ba4042d4b75515c04267550f3ad49ff6271b5af9562443.css" integrity="sha256-apgpL7j6jPDzukBC1LdVFcBCZ1UPOtSf9icbWvlWJEM=" rel="preload stylesheet" as="style">
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="mask-icon" href="/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="/posts/index.xml">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Posts" />
+<meta property="og:description" content="" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="/posts/" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Posts"/>
+<meta name="twitter:description" content=""/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "/posts/"
+    }
+  ]
+}
+</script>
+</head>
+
+<body class="list" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="/" accesskey="h" title="BrokenBrowser - Fun with browser vulnerabilities (Alt + H)">BrokenBrowser - Fun with browser vulnerabilities</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header">
+  <h1>
+    Posts
+  </h1>
+</header>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>Bypassing the patch to keep spoofing the Smartscreen/Malware warning (Edge)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Yesterday, Microsoft pushed a gigantic update where tons of security bugs were fortunately killed, including most ones from this website. Kudos, big kudos to the Edge developers and the ones in charge of its security. Please, convince the ones who want to keep the ridiculous IE policies to change their minds or at least publicly explain why they don’t care about IE, at all. Kill it or protect it.
+Bug hunter, if you haven’t seen the original bug, please do so before reading the post below which explains how to bypass the patch....</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-03-15 21:39:02 -0300 -03'>March 15, 2017</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to Bypassing the patch to keep spoofing the Smartscreen/Malware warning (Edge)" href="/posts/bypass-the-patch-to-keep-spoofing-the-address-bar-with-the-malware-warning/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>The Attack of the Alerts and the Zombie Script (IE)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>In our previous post we found a way to UXSS (bypass the SOP policy) using the htmlFile/ActiveXObject, however, I mentioned that there were other interesting things to do using that same object. Have you tried anything? If yes, congratulations. The only way to find bugs is by trying, and today we are going to explore another interesting thing that can be done with the same ActiveXObject.
+Have you noted recently that all browsers have a feature to block perpetual alerts?...</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-02-20 14:51:18 -0300 -03'>February 20, 2017</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to The Attack of the Alerts and the Zombie Script (IE)" href="/posts/zombie-alert/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>SOP bypass / UXSS htmlFile in IFrame (IE)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Today we are going to explore a feature that has been present on Internet Explorer almost since its inception. A feature that allows web-developers to instantiate external objects, and because of that it was abused ad-nauseum by attackers. Do you guess which feature are we talking about? The ActiveXObject.
+Even if these days it is restricted and we can’t happily render Excel spreadsheets anymore, there are still tons of things that can be done....</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-02-06 22:03:47 -0300 -03'>February 6, 2017</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to SOP bypass / UXSS htmlFile in IFrame (IE)" href="/posts/uxss-ie-htmlfile/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>SOP bypass / UXSS - Adventures in a Domainless World (Edge)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Today we are going to walk around a few design issues that, when used together, will end up in a full SOP bypass or Universal Cross Site Scripting (UXSS) on Microsoft Edge. If you are not a security researcher but you still want to understand this vulnerability, think about it this way: visiting a malicious webpage an attacker will be able to read the cookies of your fav sites, change the content on the fly (on the client), sometimes even get personal information like saved usernames/passwords....</p>
+  </div>
+  <footer class="entry-footer"><span title='2016-12-13 12:56:37 -0300 -03'>December 13, 2016</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to SOP bypass / UXSS - Adventures in a Domainless World (Edge)" href="/posts/uxss-edge-domainless-world/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>Spoofing the address bar and the SmartScreen/Malware Warning (Edge)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Update: this bug was patched on 2017-03-14 but we found a bypass the same day. Here it is: Bypassing the patch to continue spoofing the address bar and the Malware Warning.
+Over the last few months, we’ve seen a proliferation of these tech-support scams where users end up “locked” in their browsers with horrible red-screens and messages like “your computer may be at risk“. This is not new of course, but scammers are using more and more tricks to fool their victims....</p>
+  </div>
+  <footer class="entry-footer"><span title='2016-12-07 13:34:22 -0300 -03'>December 7, 2016</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to Spoofing the address bar and the SmartScreen/Malware Warning (Edge)" href="/posts/spoof-addressbar-malware/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>Abusing of Protocols to Load Local Files, bypass the HTML5 Sandbox and Open Popups (Edge)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>On October 25th, the fellows @MSEdgeDev twitted a link that called my attention because when I clicked on it (being on Chrome) the Windows Store App opened. It might not surprise you, but it surprised me!
+As far as I remembered, Chrome had this healthy habit of asking the user before opening external programs but in this case it opened directly, without warnings.
+This was different and caught my attention because I never accepted to open the Windows Store in Chrome....</p>
+  </div>
+  <footer class="entry-footer"><span title='2016-11-25 19:35:08 -0300 -03'>November 25, 2016</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to Abusing of Protocols to Load Local Files, bypass the HTML5 Sandbox and Open Popups (Edge)" href="/posts/abusing-of-protocols/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>Bypassing Mixed Content Warnings - Loading Insecure Content in Secure Pages (Edge/IE)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>There are no doubts that the web is moving forward to HTTPS (secure) content. Most important names have today their certificates ready and their websites are in effect, secure. But have you ever wandered: secure to what extent? It’s clear that content served through HTTPS is protected from man in the middle (MITM) attacks, network sniffing/tampering and more. But, have you ever thought if the HTTPS protocol is protecting end users from something else?...</p>
+  </div>
+  <footer class="entry-footer"><span title='2016-11-15 04:19:52 -0300 -03'>November 15, 2016</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to Bypassing Mixed Content Warnings - Loading Insecure Content in Secure Pages (Edge/IE)" href="/posts/loading-insecure-content-in-secure-pages/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>Detecting Local Files to Evade Analysts (IE)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Last month we’ve been looking at how attackers were targeting unsavvy users by checking the associated mimeTypes to applications on the system. If the PC had analyst tools installed, something detected from withing the browser, then the malware refused to download the bad bits staying below the radars for a longer period of time. The vendor patched the bug but unfortunately bypassing it is quite easy by just combining what attackers already have....</p>
+  </div>
+  <footer class="entry-footer"><span title='2016-10-18 02:41:34 -0300 -03'>October 18, 2016</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to Detecting Local Files to Evade Analysts (IE)" href="/posts/detecting-local-files-to-evade-analysts/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>On Patching Security Bugs
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Hello fellow bug hunter!
+I want to share with you my thoughts on a slight change that the folks at Microsoft could embrace to make security better. This change, in my opinion, will make the security process more transparent for all, attracting bug hunters and making the lives of the bad guys more miserable, or at least less profitable.
+Personally, I think Microsoft is full of smart people with good intentions, but I disagree in many cases with their current way of treating security bugs so I expect a change, like the other big ones took long ago....</p>
+  </div>
+  <footer class="entry-footer"><span title='2016-10-02 16:43:03 -0300 -03'>October 2, 2016</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to On Patching Security Bugs" href="/posts/on-patching-security-bugs/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>Workers SOP Bypass importScripts and baseHref (Edge/IE)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>As we know, all browsers impose several restrictions when trying to access resources from different origins. Of course we can play music and render images coming from different domains but thanks to the Same Origin Policy, we will not be able to read the content of those resources. For example, we can draw an image on a canvas but can’t read its pixels using getImageData unless it is hosted on the same domain as main html....</p>
+  </div>
+  <footer class="entry-footer"><span title='2016-09-27 17:10:31 -0300 -03'>September 27, 2016</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to Workers SOP Bypass importScripts and baseHref (Edge/IE)" href="/posts/workers-sop-bypass-importscripts-and-basehref/"></a>
+</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="prev" href="/posts/">
+      «&nbsp;Prev&nbsp;
+    </a>
+    <a class="next" href="/posts/page/3/">Next&nbsp;&nbsp;»
+    </a>
+  </nav>
+</footer>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="/">BrokenBrowser - Fun with browser vulnerabilities</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

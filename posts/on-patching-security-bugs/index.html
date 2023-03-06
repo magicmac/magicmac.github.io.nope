@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>On Patching Security Bugs | BrokenBrowser - Fun with browser vulnerabilities</title>
+<meta name="keywords" content="">
+<meta name="description" content="Hello fellow bug hunter!
+I want to share with you my thoughts on a slight change that the folks at Microsoft could embrace to make security better. This change, in my opinion, will make the security process more transparent for all, attracting bug hunters and making the lives of the bad guys more miserable, or at least less profitable.
+Personally, I think Microsoft is full of smart people with good intentions, but I disagree in many cases with their current way of treating security bugs so I expect a change, like the other big ones took long ago.">
+<meta name="author" content="magicmac">
+<link rel="canonical" href="/posts/on-patching-security-bugs/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.6a98292fb8fa8cf0f3ba4042d4b75515c04267550f3ad49ff6271b5af9562443.css" integrity="sha256-apgpL7j6jPDzukBC1LdVFcBCZ1UPOtSf9icbWvlWJEM=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="mask-icon" href="/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="On Patching Security Bugs" />
+<meta property="og:description" content="Hello fellow bug hunter!
+I want to share with you my thoughts on a slight change that the folks at Microsoft could embrace to make security better. This change, in my opinion, will make the security process more transparent for all, attracting bug hunters and making the lives of the bad guys more miserable, or at least less profitable.
+Personally, I think Microsoft is full of smart people with good intentions, but I disagree in many cases with their current way of treating security bugs so I expect a change, like the other big ones took long ago." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/on-patching-security-bugs/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2016-10-02T16:43:03-03:00" />
+<meta property="article:modified_time" content="2016-10-02T16:43:03-03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="On Patching Security Bugs"/>
+<meta name="twitter:description" content="Hello fellow bug hunter!
+I want to share with you my thoughts on a slight change that the folks at Microsoft could embrace to make security better. This change, in my opinion, will make the security process more transparent for all, attracting bug hunters and making the lives of the bad guys more miserable, or at least less profitable.
+Personally, I think Microsoft is full of smart people with good intentions, but I disagree in many cases with their current way of treating security bugs so I expect a change, like the other big ones took long ago."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "/posts/"
+    }
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "On Patching Security Bugs",
+      "item": "/posts/on-patching-security-bugs/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "On Patching Security Bugs",
+  "name": "On Patching Security Bugs",
+  "description": "Hello fellow bug hunter!\nI want to share with you my thoughts on a slight change that the folks at Microsoft could embrace to make security better. This change, in my opinion, will make the security process more transparent for all, attracting bug hunters and making the lives of the bad guys more miserable, or at least less profitable.\nPersonally, I think Microsoft is full of smart people with good intentions, but I disagree in many cases with their current way of treating security bugs so I expect a change, like the other big ones took long ago.",
+  "keywords": [
+    
+  ],
+  "articleBody": "Hello fellow bug hunter!\nI want to share with you my thoughts on a slight change that the folks at Microsoft could embrace to make security better. This change, in my opinion, will make the security process more transparent for all, attracting bug hunters and making the lives of the bad guys more miserable, or at least less profitable.\nPersonally, I think Microsoft is full of smart people with good intentions, but I disagree in many cases with their current way of treating security bugs so I expect a change, like the other big ones took long ago. Let’s see something concrete:\nTo patch vulnerabilities in 60 days or less, like the CERT disclosure policy of 45 days. To keep a permanent reward system (aka bug bounty) open for their supported browsers. That is fair for today’s standards and it’s even less that what others are doing in urgent cases. How is it possible that Microsoft needs 120 days while Firefox can do it in a day and Chrome, same thing!\nFirefox – […] should update automatically over the next 24 hours […]\nChrome – […] if we find an important security bug, we push out a fix within 24 hours—no update from you required.\nCome on, Microsoft. I’m not the only one who wants that. As for today the request “Allow Edge to be updated on its own” has 1715 votes, and Thurrott has been talking about it more than once. Also, you are in the news all the time for being a slow patcher.\nThe saga shows that Microsoft’s progress on security issues, as well as that of the software industry as a whole, remains uneven in an era when the stakes are growing dramatically.\nWhy don’t you set fast-patching as a priority?\nAnd regarding bounties, both Google Chrome and Mozilla Firefox have clear rules about what’s a bug and what’s not, to the point that Google publishes exactly what’s the reward on each bug type (see Chrome and Firefox rewards). But I’m not speaking of the exact amount of money that these companies pay because that should be determined by the companies themselves. I don’t expect anyone to match the value of others, but I do expect everyone to agree on what’s a bug, what’s not, and a quick-transparent patching process.\nGood changes On August 4, 2016, Microsoft included design bugs in their Edge bounty [extended until June 30, 2017] (by design bugs I mean SOP bypasses, UXSS, referrer spoofing, etc). The list is clearly incomplete but it’s a good start, however, Internet Explorer is still excluded. In other words, a researcher who finds a way to grab your Paypal credentials on IE will be rewarded with a “thanks, we will try to patch in 120 days but if you speak publicly about it we will not credit you” while the same thing on Edge is rewarded with money.\nI completely understand the business logic here: Microsoft wants to get rid of IE and move that user base to Edge, but I disagree because we are leaving behind too many people, a user base five times bigger than Edge.\nMake no mistake, I applaud that decision because they are moving in the right direction: a faster and more secure browser. However, we can’t leave IE behind unless the user base decreases to almost zero. We need to protect those users even more because evidence shows that they are being attacked again and again, and abused with all type of design bugs like fingerprinting the PC and delivering the bad bits only to unsavvy users.\nBrowser Market Share 2016 Q3 Source: netmarketshare.com\nEven if I agree with the idea of moving users away from IE, the current market share (Q3 2016) shows that we should continue taking care of them during the transition. Attackers do not waste their opportunities and as long as there are vulnerable users they will be attacked with no mercy. Attackers can fingerprint IE users pretty well in order target their victims with precision. And this is something that we also need to consider: when we know a bug is being exploited in the wild, we should patch it ASAP with no excuses. Of course I understand Microsoft patching mechanism can’t be immediate today, but at least we should make sure that it is prioritized correctly and patched fast.\nToday standards are higher than the ones from the previous decade. We are now concerned about privacy like never before and just being able to fingerprint the user is considered bad, and browser makers try to avoid that at all costs. Microsoft, please do the same!\nWe need to attract honest-decent-bug hunters and give them motivation to research and report properly. This is what other companies promote and I firmly believe Microsoft should join them. Why not? If we want to move IE users to Edge, why not being respectful and really support them during the transition? The engine that runs IE, Trident, is still used by several desktop applications and leaving that engine behind means leaving those applications behind. Windows users with desktop Skype are essentially running an IE.\nPatching Time and Bounties Another important thing is to patch during in a max 60 day period. Microsoft says they do it in 90/120 and maybe that’s what they try to achieve, but the reality is different and more than once researchers complain because Microsoft seems to be sitting on the bugs for more than what’s advertised.\nBug bounties should be open for as long as you care about the related products. If you set a time frame for the bounties, you are promoting bug hunters to sit on their findings until a new bounty is open. Why would you close a program like that? What would be the logic, or who is benefited by setting a time frame around bounties? Attackers.\nIt is not true that moving bounties around products motivate researchers to switch from an app to the other. Of course there are researchers following the bounties and moving their targets, but we also have a another group of researchers with preferences and favorites who won’t be following the money jumping from Edge to Microsoft Movie Maker. We need to be mature here, think, and do the best in the interest of all. IE and Edge are exposed 24/7 and a simple navigation could be enough to get into users PC.\nI really, wholeheartedly hope that somebody at Microsoft thinks about this. We are all against attackers so we need to keep our honesty high, making sure we behave in the best interest of final users who in general don’t have a clue of all these things.\nYou can find researchers on both sides of the argument: in favor and against full disclosure. I am against it only if the affected company demonstrates that it is acting in the best interest of final users. In my opinion, some people at Microsoft do not care and they just do what they want, so phrases like responsible disclosure will ring in my mind if responsible patching rings in Redmond. I will keep sharing my findings until something changes.\nRespect My absolute respect to Edge and IE developers. I really think they are creating an amazing browser, but we need a permanent team of attackers helping, firing non-stop at Edge/IE. People testing the new features properly, not just fuzzing for memory errors. Edge is already strong in that area, but design bugs are still there.\nThank you for reading until this point and have a nice day!\nManuel.\n",
+  "wordCount" : "1262",
+  "inLanguage": "en",
+  "datePublished": "2016-10-02T16:43:03-03:00",
+  "dateModified": "2016-10-02T16:43:03-03:00",
+  "author":{
+    "@type": "Person",
+    "name": "magicmac"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/posts/on-patching-security-bugs/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "BrokenBrowser - Fun with browser vulnerabilities",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="/" accesskey="h" title="BrokenBrowser - Fun with browser vulnerabilities (Alt + H)">BrokenBrowser - Fun with browser vulnerabilities</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      On Patching Security Bugs
+    </h1>
+    <div class="post-meta"><span title='2016-10-02 16:43:03 -0300 -03'>October 2, 2016</span>&nbsp;·&nbsp;magicmac
+
+</div>
+  </header> 
+  <div class="post-content"><p>Hello fellow bug hunter!</p>
+<p>I want to share with you my thoughts on a slight change that the folks at Microsoft could embrace to make security better. This change, in my opinion, will make the security process more transparent for all, attracting bug hunters and making the lives of the bad guys more miserable, or at least less profitable.</p>
+<p>Personally, I think Microsoft is full of smart people with good intentions, but I disagree in many cases with their current way of treating security bugs so I expect a change, like the other big ones took long ago. Let’s see something concrete:</p>
+<ol>
+<li>To patch vulnerabilities in 60 days or less, like the <a href="http://www.cert.org/vulnerability-analysis/vul-disclosure.cfm">CERT disclosure policy of 45 days</a>.</li>
+<li>To keep a permanent reward system (aka bug bounty) open for their <a href="https://support.microsoft.com/en-us/help/17454/lifecycle-support-policy-faq-internet-explorer">supported browsers</a>.</li>
+</ol>
+<p>That is fair for today’s standards and it’s even less that what others are doing in urgent cases. How is it possible that Microsoft needs 120 days while <a href="https://blog.mozilla.org/security/2016/11/30/fixing-an-svg-animation-vulnerability/">Firefox can do it in a day</a> and <a href="https://blog.google/products/chrome/chrome-secure-default-everyone/">Chrome, same thing</a>!</p>
+<blockquote>
+<p>Firefox – […] should update automatically over the next 24 hours […]</p>
+<p>Chrome – […] if we find an important security bug, we push out a fix within 24 hours—no update from you required.</p>
+</blockquote>
+<p>Come on, Microsoft. I’m not the only one who wants that. As for today the request “<a href="https://wpdev.uservoice.com/forums/257854-microsoft-edge-developer/suggestions/10967505-allow-edge-to-be-updated-on-its-own">Allow Edge to be updated on its own</a>” has 1715 votes, and <a href="https://www.thurrott.com/windows/windows-10/75945/microsoft-time-treat-edge-like-real-app">Thurrott has been talking about it</a> more than once. Also, <a href="http://www.reuters.com/article/us-microsoft-cyber-idUSKBN17S32G">you are in the news</a> all the time for being a slow patcher.</p>
+<blockquote>
+<p>The saga shows that Microsoft’s progress on security issues, as well as that of the software industry as a whole, <strong>remains uneven in an era when the stakes are growing dramatically</strong>.</p>
+</blockquote>
+<p>Why don’t you set fast-patching as a priority?</p>
+<p>And regarding bounties, both Google Chrome and Mozilla Firefox have clear rules about what’s a bug and what’s not, to the point that Google publishes exactly what’s the reward on each bug type (see <a href="https://www.google.com/about/appsecurity/chrome-rewards/">Chrome</a> and <a href="https://www.mozilla.org/en-US/security/client-bug-bounty/">Firefox</a> rewards). But I’m not speaking of the exact amount of money that these companies pay because that should be determined by the companies themselves. I don’t expect anyone to match the value of others, but I do expect everyone to agree on what’s a bug, what’s not, and a quick-transparent patching process.</p>
+<h2 id="good-changes">Good changes<a hidden class="anchor" aria-hidden="true" href="#good-changes">#</a></h2>
+<p>On August 4, 2016, <a href="https://blogs.technet.microsoft.com/msrc/2016/09/28/update-to-the-microsoft-edge-web-platform-on-windows-insider-preview-bug-bounty-program-terms/">Microsoft included design bugs</a> in their <a href="https://technet.microsoft.com/en-us/mt761990">Edge bounty</a> [<a href="https://blogs.technet.microsoft.com/msrc/2017/05/16/extending-microsoft-edge-bounty-program/">extended until June 30, 2017</a>] (by design bugs I mean <a href="https://www.brokenbrowser.com/sop-bypass-uxss-tweeting-like-charles-darwin/">SOP bypasses</a>, <a href="https://www.brokenbrowser.com/uxss-ie-domainless-world/">UXSS</a>, <a href="https://www.brokenbrowser.com/referer-spoofing-patch-bypass/">referrer spoofing</a>, etc). The list is clearly incomplete but it’s a good start, however, Internet Explorer is still excluded. In other words, a researcher who finds a way to grab your Paypal credentials on IE will be rewarded with a “<em>thanks, we will try to patch in 120 days but if you speak publicly about it we will not credit you</em>” while the same thing on Edge is rewarded with money.</p>
+<p>I completely understand the business logic here: <strong>Microsoft wants to get rid of IE</strong> and move that user base to Edge, but I disagree because we are leaving behind too many people, a user base five times bigger than Edge.</p>
+<p>Make no mistake, I applaud that decision because they are moving in the right direction: a faster and more secure browser. However, we can’t leave IE behind unless the user base decreases to almost zero. We need to protect those users even more because evidence shows that they are being attacked again and again, and abused with all type of design bugs like <a href="https://www.brokenbrowser.com/detecting-apps-mimetype-malware/">fingerprinting the PC and delivering the bad bits only to unsavvy users</a>.</p>
+<h2 id="browser-market-share-2016-q3">Browser Market Share 2016 Q3<a hidden class="anchor" aria-hidden="true" href="#browser-market-share-2016-q3">#</a></h2>
+<p><img loading="lazy" src="/2016/10/market-share.png" alt="Desktop Browser Market Share"  />
+</p>
+<p>Source: <a href="https://www.netmarketshare.com/browser-market-share.aspx?qprid=0&amp;qpcustomd=0&amp;qpstick=1&amp;qpsp=70&amp;qpnp=1&amp;qptimeframe=Q">netmarketshare.com</a></p>
+<p>Even if I agree with the idea of moving users away from IE, the current market share (Q3 2016) shows that we should continue taking care of them during the transition. Attackers do not waste their opportunities and as long as there are vulnerable users they will be attacked with no mercy. Attackers can fingerprint IE users pretty well in order target their victims with precision. And this is something that we also need to consider: <strong>when we know a bug is being exploited in the wild, we should patch it ASAP with no excuses</strong>. Of course I understand Microsoft patching mechanism can’t be immediate today, but at least we should make sure that it is prioritized correctly and <!-- raw HTML omitted -->patched fast<!-- raw HTML omitted -->.</p>
+<p>Today standards are higher than the ones from the previous decade. We are now concerned about privacy like never before and just being able to fingerprint the user is considered bad, and browser makers try to avoid that at all costs. Microsoft, please do the same!</p>
+<p>We need to attract honest-decent-bug hunters and give them motivation to research and report properly. This is what other companies promote and I firmly believe Microsoft should join them. Why not? If we want to move IE users to Edge, why not being respectful and really support them during the transition? The engine that runs IE, Trident, is still <a href="https://en.wikipedia.org/wiki/Trident_(layout_engine)#Use_cases">used by several desktop applications</a> and leaving that engine behind means leaving <a href="https://twitter.com/magicmac2000/status/855196875338678272">those applications behind</a>. Windows users with desktop Skype are essentially running an IE.</p>
+<h2 id="patching-time-and-bounties">Patching Time and Bounties<a hidden class="anchor" aria-hidden="true" href="#patching-time-and-bounties">#</a></h2>
+<p>Another important thing is to patch during in a max 60 day period. Microsoft says they do it in 90/120 and maybe that’s what they try to achieve, but the reality is different and more than once researchers complain because Microsoft seems to be sitting on the bugs for more than what’s advertised.</p>
+<p>Bug bounties should be open for as long as you care about the related products. If you set a time frame for the bounties, you are promoting bug hunters to sit on their findings until a new bounty is open. Why would you close a program like that? What would be the logic, or who is benefited by setting a time frame around bounties? Attackers.</p>
+<p>It is not true that moving bounties around products motivate researchers to switch from an app to the other. Of course there are researchers following the bounties and moving their targets, but we also have a another group of researchers with preferences and favorites who won’t be following the money jumping from Edge to Microsoft Movie Maker. We need to be mature here, think, and do the best in the interest of all. <strong>IE and Edge are exposed 24/7 and a simple navigation could be enough to get into users PC</strong>.</p>
+<p>I really, wholeheartedly hope that somebody at Microsoft thinks about this. We are all against attackers so we need to keep our honesty high, making sure we behave in the best interest of final users who in general don’t have a clue of all these things.</p>
+<p>You can find researchers on both sides of the argument: in favor and against full disclosure. I am against it only if the affected company demonstrates that it is acting in the best interest of final users. In my opinion, some people at Microsoft do not care and they just do what they want, so phrases like <em><a href="https://en.wikipedia.org/wiki/Responsible_disclosure">responsible disclosure</a></em> will ring in my mind if <strong>responsible patching</strong> rings in Redmond. <strong>I will keep sharing my findings until something changes.</strong></p>
+<h2 id="respect">Respect<a hidden class="anchor" aria-hidden="true" href="#respect">#</a></h2>
+<p>My absolute respect to Edge and IE developers. I <strong>really</strong> think they are creating an amazing browser, but we need a permanent team of attackers helping, firing non-stop at Edge/IE. People testing the new features properly, not just fuzzing for memory errors. Edge is already strong in that area, but <strong>design bugs are still there</strong>.</p>
+<p>Thank you for reading until this point and have a nice day!</p>
+<p><a href="https://twitter.com/magicmac2000">Manuel</a>.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="/">BrokenBrowser - Fun with browser vulnerabilities</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

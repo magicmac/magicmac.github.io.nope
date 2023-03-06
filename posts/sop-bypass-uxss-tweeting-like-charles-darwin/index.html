@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>SOP bypass / UXSS - Tweeting like Charles Darwin (Edge) | BrokenBrowser - Fun with browser vulnerabilities</title>
+<meta name="keywords" content="">
+<meta name="description" content="Watch the 2 minutes exploit video where we manually tweet as if we were Charles Darwin, and get his password (thanks to the default password manager of Microsoft Edge). If you are out of time, watch the 1 minute video where we do the same thing, automatically.
+Charles Darwin is an example, this Microsoft Edge vulnerability allows the attacker to tweet or do anything (password anyone?) from many websites on behalf of the logged user.">
+<meta name="author" content="magicmac">
+<link rel="canonical" href="/posts/sop-bypass-uxss-tweeting-like-charles-darwin/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.6a98292fb8fa8cf0f3ba4042d4b75515c04267550f3ad49ff6271b5af9562443.css" integrity="sha256-apgpL7j6jPDzukBC1LdVFcBCZ1UPOtSf9icbWvlWJEM=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="mask-icon" href="/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="SOP bypass / UXSS - Tweeting like Charles Darwin (Edge)" />
+<meta property="og:description" content="Watch the 2 minutes exploit video where we manually tweet as if we were Charles Darwin, and get his password (thanks to the default password manager of Microsoft Edge). If you are out of time, watch the 1 minute video where we do the same thing, automatically.
+Charles Darwin is an example, this Microsoft Edge vulnerability allows the attacker to tweet or do anything (password anyone?) from many websites on behalf of the logged user." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/sop-bypass-uxss-tweeting-like-charles-darwin/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2017-04-24T09:44:46-03:00" />
+<meta property="article:modified_time" content="2017-04-24T09:44:46-03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="SOP bypass / UXSS - Tweeting like Charles Darwin (Edge)"/>
+<meta name="twitter:description" content="Watch the 2 minutes exploit video where we manually tweet as if we were Charles Darwin, and get his password (thanks to the default password manager of Microsoft Edge). If you are out of time, watch the 1 minute video where we do the same thing, automatically.
+Charles Darwin is an example, this Microsoft Edge vulnerability allows the attacker to tweet or do anything (password anyone?) from many websites on behalf of the logged user."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "/posts/"
+    }
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "SOP bypass / UXSS - Tweeting like Charles Darwin (Edge)",
+      "item": "/posts/sop-bypass-uxss-tweeting-like-charles-darwin/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "SOP bypass / UXSS - Tweeting like Charles Darwin (Edge)",
+  "name": "SOP bypass \/ UXSS - Tweeting like Charles Darwin (Edge)",
+  "description": "Watch the 2 minutes exploit video where we manually tweet as if we were Charles Darwin, and get his password (thanks to the default password manager of Microsoft Edge). If you are out of time, watch the 1 minute video where we do the same thing, automatically.\nCharles Darwin is an example, this Microsoft Edge vulnerability allows the attacker to tweet or do anything (password anyone?) from many websites on behalf of the logged user.",
+  "keywords": [
+    
+  ],
+  "articleBody": "Watch the 2 minutes exploit video where we manually tweet as if we were Charles Darwin, and get his password (thanks to the default password manager of Microsoft Edge). If you are out of time, watch the 1 minute video where we do the same thing, automatically.\nCharles Darwin is an example, this Microsoft Edge vulnerability allows the attacker to tweet or do anything (password anyone?) from many websites on behalf of the logged user.\nWe are going to explore yet another SOP bypass on Microsoft Edge, but in this case abusing of the data/meta tags plus the fact that domainless pages have free access to domained ones.\n[ Update: this bug was patched on 2017-06-13 ] If this is your first time here, I suggest you reading these two SOP bypasses first: Adventures in a Domainless World (Edge) and More Adventures in a Domainless World (IE). The following post is based on the same idea, just a new technique.\nLet’s quickly refresh on this important concept: about:blank pages have always the domain of their referrer, meaning that an about:blank from a twitter’s iframe can’t access to a google’s blank. Even if the address matches between them (about:blank), the document.domain is different.\nIn the past, we were able to create about:blanks without domains, or domainless about:blanks. Those ones have the power to access every about:blank regardless of its domain. For example, let’s say we have a domainless blank on the main page rendering an iframe pointing to twitter and another one to google. Those iframes have blank sub-iframes inside, and their domains are like their parents: twitter and google. In a case like this, the top window has access to the sub-iframes, completely bypassing the SOP.\nThe above scenario above worked perfectly well, but Microsoft patched it three months ago using a very clever trick: domainless blanks are not really domainless anymore, they are always set with a random GUID as their domain, like this: {53394a4f-8c04-46ab-94af-3ab86ffcfd4c}. And there’s something even more interesting (hat tip to Edge Developers): the domain will look as if it were blank/empty, but it is not. In other words, Edge will hide the GUID and return empty, but internally, it is still a GUID.\nLet’s experiment! Open Edge with DevTools enabled (F12) and type about:blank into the address bar. This used to create a domainless blank and it still looks as if nothing has changed, but Edge is performing a trick for us. Appreciate its magic for a second please, we will have plenty of time to break the spell anyway.\nAs we can see, DevTools thinks we are on an empty domain, but it is not.\nBreaking the spell If even DevTools is being fooled, how can we see what’s really happening here? Easier than expected, just try to load anything with a relative path, or change the location of this window, or even a document.write will reveal the trick. Let’s use a location.href = 1 and see what happens.\nTop data-uri patched and Flash disabled Our previous technique to create domainless blanks has been patched. We were setting a data-uri on the main (top) window with the help of a Flash/GetURL. But the trick was patched and even worse, we can’t automatically run Flash anymore! In Windows Creators Update, Edge asks for permission to run Flash.\nThe PoCs from previous posts look ugly now! Kudos to the Edge team for reducing the attack surface here.\nFinding a new domainless blank Our data-uri trick against the top does not work anymore, so how can we overcome this? First of all, I started playing against an iframe instead of the top, because as we’ve seen in the past, Edge does not like data-uris in the main window.\ntop.location.href = \"data:text/html,SOMETHING\"; // Fails badly, error page But setting a data-uri as the location of an iframe works well. However, this is not a bug, the iframe domain is isolated from the top.\nAs we’ve seen in the reader mode SOP bypass, the data-uri “isolated” restriction is trivial to bypass (just a self document.write and we can access the parent), but we don’t want that now. Accessing the top makes no sense right now, what we want is a way to get a domainless blank. For that, we will need a triple-combo: data-meta-data. That will make Edge gently give us back what it took from us!\nTo be concrete, we will set the location of an iframe with a data uri that renders a meta refresh which redirects to another data uri. That’s the moment where you, I, and even Edge get lost 🙂\nI know it is not as beautiful as E=mc2, but our trick could have been used to steal Einstein’s credentials, email, paypal account and even tweet something on his name. Let’s first test if what we’ve learned until this point really works. We will play with bing.com which is easy because it has an inner blank iframe and it does not use XFO.\nWarming up with bing.com We will create a webpage with two iframes: one with bing.com and one domainless. From the domainless we will execute code inside bing’s inner blank iframe. Bing images is perfect for our needs. Let me open Chrome for a second and show you what I mean.\nThis is great. Now we will frame this page and inject code into the blank iframe with the help of our domainless data-meta-data. But there’s something that I didn’t say, bug hunter. Do you remember the naming problem that we had with nature.com in our original domainless SOP? If not, let me give you a very quick refresh.\nAt this point, our domainless iframe is able to access bing’s blank, but, the access mechanism is extremely important. We can’t just access the DOM straight, we must use the window.open method. In other words, if bing is in the first iframe of the main page, we won’t be able to access its inner iframe this way:\nalert(top[0][0].document.cookie); // ACCESS DENIED In fact, we can’t even do this\ntop[0][0].location.href = \"javascript:alert(document.cookie)\"; // ACCESS DENIED So, how can we do it? Very easy, a window open with a javascript url and the name of the iframe. If bing’s inner iframe name were “INNER_IFRAME“, the following code would work perfectly well:\nwindow.open(\"javascript:alert(document.cookie)\", \"INNER_IFRAME\"); // SOP BYPASSED! But damn it! This nested iframe in Bing doesn’t have a name! Bug hunter, don’t panic. We can either request the Bing team to set a name for us, 🙂 or, we can keep pushing. Better to keep pushing!\nSetting an iframe name We can’t set the name of an iframe that we don’t own, unless it is in the same domain as we are. We are going to render a bing iframe that has a blank one inside. The outer iframe is on the different domain, but the tag itself (the element, the object) is in our domain, so we can set any name we want.\nBut the inner iframe is rendered by bing, and even if it’s blank, its domain is still bing.com. The only way to change its name is to first set its location to one that we can access, and only then change its name. Now, if we change the location of the about:blank it will be like shooting in the foot, because we need to be be bing.com so we can later access with the domainless blank.\nRemember: our goal is to access from a domainless blank to a domained one. If we set the domain to match ours, then it makes no sense to access it! So here’s what we will do: we will set the location, change the iframe name and then, restore the location back in such a way that it will keep the original domain. Sounds complicated?\n// Sets the location of Bing's inner iframe to about:blank // But now it is in our domain so we can set a name to it. window[0][0].location = \"about:blank\"; // Set the inner iframe name to \"CHARLES\" so we can later inject code // using a window.open(\"javascript:[...]\",\"CHARLES\"); window[0][0].name = \"CHARLES\"; // Restore Bing's domain to the about:blank that we've just renamed. window[0][0].document.write(''); window[0][0].document.close(); Let me give you the good news: we don’t really need sites with “about:blank” iframes because we can always do as we did above. In other words, it does not matter if bing’s inner iframe was about:blank on not because we ended up setting it as blank with its original domain! I don’t know how you feel bug hunter, but I feel exactly like this.\nThe doors are open for us! We can finally run the window.open from our data-meta-data iframe:\nwindow.open(\"javascript:alert(document.cookie)\", \"CHARLES\"); // Fireeeeeeeeeee!!! [ Test the PoC Live on Edge ] [ Video in YouTube ] One important thing regarding the PoC, bug hunter: in the sample above we are using an http (insecure) connection because in https the meta refresh to data is blocked so it never redirects to the final data uri. Edge incorrectly thinks that the redirection is insecure. However, this can be easily bypassed by using a document.write. So instead of a data-meta-data it should be document.write(meta-data). Makes sense?\nWe are not using it in the PoC above, because when making the demo interactive (making you press buttons to run it) Edge crashes (non-exploitable ) a third of the times. So, I’ve chosen to use a guided and reliable PoC in http vs https automatic. But either way, as we will see below it does not really matter: our insecure domainless page is capable of accessing secure pages. Let’s build a real case.\nA real attack: Stealing Charles cookies It is the time to build an attack, bug hunter. Join me into the time machine where we can fly to the past, bringing computers and Internet to the geniuses that preceded us. Charles Darwin is thinking about how species change over time, while Alfred Wallace is having similar ideas. Charles is aware of hackers so he uses his computer in paranoid mode: he never opens a link in using the same browser window where he has his gmail, twitter, and personal documents.\nTake a look, bug hunter. He is opening a new InPrivate window from the task bar!\nHe is in good mood, to the point that he opens another tab with his Twitter account, and teases Alfred Wallace about who will tweet first.\nThe response from Wallace came a few hours later, and it included a link with evidence supporting his claims. But remember, Charles did not trust anyone so he copied the link in order to paste it into a new window, away from the one where he had his personal data (gmail, twitter).\nWhat can go wrong? Everything! Twitter has several iframes, just like most sites in the world. In fact, it has two blank iframes with names, so this should be easier than Bing! But before going back to our story 🙂 let’s enumerate twitter’s iframes using DevTools to find a good candidate. I’m opening a different window here, nothing to do with Charles session.\nExcellent! dm-post-iframe looks good, so we have all we need to take over Charlie’s account.\nCharles opened a new inPrivate window and loaded the URL that Wallace sent him. What he didn’t know was that browser windows, even inPrivate, can communicate with each other. So, what will happen if we execute the code below in our domainless iframe?\nwindow.open(\"javascript:alert(document.cookie)\", \"dm-post-iframe\"); You are totally right. We have Charles Darwin cookies.\nWARNING: the following proof of concept will really alert (just show in your screen) your Twitter cookies. [ Test the PoC Live on Edge ] Keep in mind that we don’t really need the InPrivate windows. The example above tries to illustrate a paranoid scenario, but normally things are even easier because people click on links without doing all the work that Charles did to prevent the attack. Also, consider that attackers use malvertising, deploying their bad bits inside cheap banners from popular sites. If an attacker is hosted inside a Yahoo banner and the user is logged in into her Twitter account, she will be pwned with no interactions, at all.\nTweeting like Charles Darwin Let’s build a better PoC. Instead of reading his cookies, we will tweet on his name and even try to grab his password. Keep in mind that most users (like Charlie) use password managers that auto-fill their passwords. Edge password manager is no different, so, if Charles has saved his password, we will get it. It’s not hard, just force him a log out and the log-in page will be automatically loaded, with all his data (username and password) server to us in a silver player. In fact, in this case the form is hidden unless the user interacts, but Edge is filling it anyway so we don’t even have to make the form visible.\nBefore running the PoC, consider that it is your account the one that will be exposed, not Charles. Nothing is being sent to the network but if there’s somebody behind you, she will see your password in a regular alert dialog. Watch out!\n[ Video: Automatic Tweeting 1″ ] [ Video: Manual Tweeting 2″ ] [ Test the PoC Live on Edge ] Can we use this in sites without about:blank iframes? Of course! We can even do it in sites that don’t have iframes at all. Please, read this post where we inject an iframe on a different origin. Same here on Internet Explorer.\nIs it possible to do the same thing, in Facebook? I don’t have a facebook account, so I did not test. But a SOP bypass is capable of accessing every single domain in the planet. It could be a little bit harder to exploit, but impossible? Remember the mantra of the offensive-security guys: try harder.\nDoes this work in other browsers? I did not try, but obviously not. UXSS/SOP bypasses tend to be particular to each browser.\nThe exploit code is easy. Please get it and take a look, but if you have questions, ask! I stop here, bug hunter, otherwise this blog will be renamed to brokenmarriage.com 🙂 It’s late night in Buenos Aires, time to be with my wife!\nHave a nice day!\nManuel.\n",
+  "wordCount" : "2459",
+  "inLanguage": "en",
+  "datePublished": "2017-04-24T09:44:46-03:00",
+  "dateModified": "2017-04-24T09:44:46-03:00",
+  "author":{
+    "@type": "Person",
+    "name": "magicmac"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/posts/sop-bypass-uxss-tweeting-like-charles-darwin/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "BrokenBrowser - Fun with browser vulnerabilities",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="/" accesskey="h" title="BrokenBrowser - Fun with browser vulnerabilities (Alt + H)">BrokenBrowser - Fun with browser vulnerabilities</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      SOP bypass / UXSS - Tweeting like Charles Darwin (Edge)
+    </h1>
+    <div class="post-meta"><span title='2017-04-24 09:44:46 -0300 -03'>April 24, 2017</span>&nbsp;·&nbsp;magicmac
+
+</div>
+  </header> 
+  <div class="post-content"><p>Watch the <strong><a href="https://www.youtube.com/watch?v=PlxQBmLrnQA&amp;list=PL12o0t84rBX_oDmz93NwGNgTDiWf-HfUY">2 minutes exploit video where we manually tweet as if we were Charles Darwin, and get his password</a></strong> (thanks to the default password manager of Microsoft Edge). If you are out of time, watch the <strong><a href="https://www.youtube.com/watch?v=K3Ui3JxZGnE&amp;list=PL12o0t84rBX_oDmz93NwGNgTDiWf-HfUY">1 minute video where we do the same thing, automatically</a></strong>.</p>
+<p>Charles Darwin is an example, this Microsoft Edge vulnerability <strong>allows the attacker to tweet or do anything (password anyone?) from many websites on behalf of the logged user</strong>.</p>
+<p>We are going to explore yet another <strong>SOP bypass on Microsoft Edge</strong>, but in this case abusing of the data/meta tags plus the fact that domainless pages have free access to domained ones.</p>
+<h3 id="-update-this-bug-was-patched-on-2017-06-13-"><strong>[ Update: this bug was patched on 2017-06-13 ]</strong><a hidden class="anchor" aria-hidden="true" href="#-update-this-bug-was-patched-on-2017-06-13-">#</a></h3>
+<!-- raw HTML omitted -->
+<p>If this is your first time here, I suggest you reading these two SOP bypasses first: <a href="https://www.brokenbrowser.com/uxss-edge-domainless-world/">Adventures in a Domainless World (Edge)</a> and <a href="https://www.brokenbrowser.com/uxss-ie-domainless-world/">More Adventures in a Domainless World (IE)</a>. The following post is based on the same idea, just a new technique.</p>
+<p>Let’s quickly refresh on this important concept: <strong>about:blank pages have always the domain of their referrer</strong>, meaning that an about:blank from a twitter’s iframe can’t access to a google’s blank. Even if the address matches between them (about:blank), the document.domain is different.</p>
+<p>In the past, we were able to create about:blanks without domains, or <strong>domainless about:blanks</strong>. Those ones have the power to access every about:blank regardless of its domain. For example, let’s say we have a domainless blank on the main page rendering an iframe pointing to twitter and another one to google. Those iframes have blank sub-iframes inside, and their domains are like their parents: twitter and google. In a case like this, the top window has access to the sub-iframes, completely bypassing the SOP.</p>
+<p><img loading="lazy" src="/2017/04/00-domainless-blank-chart.png" alt=""  />
+</p>
+<p>The above scenario above worked perfectly well, but <a href="http://www.cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-0002">Microsoft patched it</a> three months ago using a <a href="https://www.brokenbrowser.com/free-ticket-to-the-intranet-zone/">very clever trick</a>: domainless blanks are not really domainless anymore, they are always set with a random GUID as their domain, like this: {53394a4f-8c04-46ab-94af-3ab86ffcfd4c}. And there’s something even more interesting (hat tip to Edge Developers): <strong>the domain will look as if it were blank/empty, but it is not</strong>. In other words, Edge will hide the GUID and return empty, but internally, it is still a GUID.</p>
+<p>Let’s experiment! Open Edge with DevTools enabled (F12) and type about:blank into the address bar. This used to create a domainless blank and it still looks as if nothing has changed, but Edge is performing a trick for us. Appreciate its magic for a second please, we will have plenty of time to break the spell anyway.</p>
+<p><img loading="lazy" src="/2017/04/01-about-lies.png" alt=""  />
+</p>
+<p>As we can see, DevTools thinks we are on an empty domain, but it is not.</p>
+<h2 id="breaking-the-spell">Breaking the spell<a hidden class="anchor" aria-hidden="true" href="#breaking-the-spell">#</a></h2>
+<p>If even DevTools is being fooled, how can we see what’s really happening here? Easier than expected, just try to load anything with a relative path, or change the location of this window, or even a document.write will reveal the trick. Let’s use a <strong>location.href = 1</strong> and see what happens.</p>
+<p><img loading="lazy" src="/2017/04/02-real-url.png" alt=""  />
+</p>
+<h2 id="top-data-uri-patched-and-flash-disabled">Top data-uri patched and Flash disabled<a hidden class="anchor" aria-hidden="true" href="#top-data-uri-patched-and-flash-disabled">#</a></h2>
+<p>Our <a href="https://www.brokenbrowser.com/uxss-edge-domainless-world/">previous technique to create domainless blanks</a> has been patched. We were setting a data-uri on the main (top) window with the help of a Flash/GetURL. But the trick was patched and even worse, we can’t automatically run Flash anymore! In Windows Creators Update, Edge asks for permission to run Flash.</p>
+<p><a href="http://unsafe.cracking.com.ar/demos/edge-domainless-uxss/bing/index.html">The PoCs</a> from previous posts look ugly now! Kudos to the Edge team for reducing the attack surface here.</p>
+<p><img loading="lazy" src="/2017/04/03-enable-flash-madam.png" alt=""  />
+</p>
+<h2 id="finding-a-new-domainless-blank">Finding a new domainless blank<a hidden class="anchor" aria-hidden="true" href="#finding-a-new-domainless-blank">#</a></h2>
+<p>Our data-uri trick against the top does not work anymore, so how can we overcome this? First of all, I started playing against an iframe instead of the top, because as we’ve seen in the past, Edge does not like data-uris in the main window.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;data: on top&#34;&gt;top.location.href = &#34;data:text/html,SOMETHING&#34;; // Fails badly, error page
+</code></pre><p>But setting a data-uri as the location of an iframe works well. However, this is not a bug, the iframe domain is isolated from the top.</p>
+<p><img loading="lazy" src="/2017/04/04-setting-data-uri.png" alt=""  />
+</p>
+<p>As we’ve seen in the <a href="https://www.brokenbrowser.com/sop-bypass-abusing-read-protocol/">reader mode SOP bypass</a>, the data-uri “isolated” restriction is trivial to bypass (just a self document.write and we can access the parent), but we don’t want that now. Accessing the top makes no sense right now, what we want is a way to get a domainless blank. For that, we will need a triple-combo: data-meta-data. That will make Edge gently give us back what it took from us!</p>
+<p>To be concrete, we will set the location of an iframe with a data uri that renders a meta refresh which redirects to another data uri. That’s the moment where you, I, and even Edge get lost 🙂</p>
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<p><img loading="lazy" src="/2017/04/05-domainless-recipe.png" alt=""  />
+</p>
+<p>I know it is not as beautiful as E=mc2, but our trick could have been used to steal Einstein’s credentials, email, paypal account and even tweet something on his name. Let’s first test if what we’ve learned until this point really works. We will play with bing.com which is easy because it has an inner blank iframe and it does not use <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options">XFO</a>.</p>
+<h2 id="warming-up-with-bingcom">Warming up with bing.com<a hidden class="anchor" aria-hidden="true" href="#warming-up-with-bingcom">#</a></h2>
+<p>We will create a webpage with two iframes: one with bing.com and one domainless. From the domainless we will execute code inside bing’s inner blank iframe. Bing images is perfect for our needs. Let me open Chrome for a second and show you what I mean.</p>
+<p><img loading="lazy" src="/2017/04/06-bing-is-easy.png" alt=""  />
+</p>
+<p>This is great. Now we will frame this page and inject code into the blank iframe with the help of our <strong>domainless data-meta-data</strong>. But there’s something that I didn’t say, bug hunter. Do you remember the naming problem that we had with nature.com in our <a href="https://www.brokenbrowser.com/uxss-edge-domainless-world/">original domainless SOP</a>? If not, let me give you a very quick refresh.</p>
+<p>At this point, our domainless iframe is able to access bing’s blank, but, the access mechanism is extremely important. We can’t just access the DOM straight, we must use the window.open method. In other words, if bing is in the first iframe of the main page, we won’t be able to access its inner iframe this way:</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;ACCESS_DENIED&#34;&gt;alert(top[0][0].document.cookie); // ACCESS DENIED
+</code></pre><p>In fact, we can’t even do this</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;ACCESS_DENIED&#34;&gt;top[0][0].location.href = &#34;javascript:alert(document.cookie)&#34;; // ACCESS DENIED
+</code></pre><p>So, how can we do it? Very easy, a window open with a javascript url <strong>and the name of the iframe</strong>. If bing’s inner iframe name were “<strong>INNER_IFRAME</strong>“, the following code would work perfectly well:</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;SOP Bypassed&#34;&gt;window.open(&#34;javascript:alert(document.cookie)&#34;, &#34;INNER_IFRAME&#34;); // SOP BYPASSED!
+</code></pre><p>But damn it! This nested iframe in Bing doesn’t have a name! Bug hunter, don’t panic. We can either request the Bing team to set a name for us, 🙂 or, we can keep pushing. Better to keep pushing!</p>
+<h2 id="setting-an-iframe-name">Setting an iframe name<a hidden class="anchor" aria-hidden="true" href="#setting-an-iframe-name">#</a></h2>
+<p>We can’t set the name of an iframe that we don’t own, unless it is in the same domain as we are. We are going to render a bing iframe that has a blank one inside. The outer iframe is on the different domain, but the tag itself (the element, the object) is in our domain, so we can set any name we want.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:xhtml decode:true &#34; title=&#34;Iframe names&#34;&gt;&lt;iframe name=&#34;ANY_NAME&#34; src=&#34;http://bing.com&#34;&gt;
+   &lt;iframe src=&#34;about:blank&#34;&gt;&lt;/iframe&gt;
+&lt;/iframe&gt;
+</code></pre><p>But the inner iframe is rendered by bing, and even if it’s blank, its domain is still bing.com. The only way to change its name is to first set its location to one that we can access, and only then change its name. Now, if we change the location of the about:blank it will be like shooting in the foot, because we need to be be bing.com so we can later access with the domainless blank.</p>
+<p>Remember: our goal is to access from a domainless blank to a domained one. If we set the domain to match ours, then it makes no sense to access it! So here’s what we will do: we will set the location, change the iframe name and then, <strong>restore the location back</strong> in such a way that it will keep the original domain. Sounds complicated?</p>
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Set inner-iframe name&#34;&gt;// Sets the location of Bing&#39;s inner iframe to about:blank
+// But now it is in our domain so we can set a name to it.
+window[0][0].location = &#34;about:blank&#34;;
+
+// Set the inner iframe name to &#34;CHARLES&#34; so we can later inject code
+// using a window.open(&#34;javascript:[...]&#34;,&#34;CHARLES&#34;);
+window[0][0].name = &#34;CHARLES&#34;;
+		
+// Restore Bing&#39;s domain to the about:blank that we&#39;ve just renamed.
+window[0][0].document.write(&#39;&lt;meta http-equiv=&#34;refresh&#34; content=&#34;0;url=about:blank&#34;&gt;&#39;);
+window[0][0].document.close();
+</code></pre><p>Let me give you the good news: we don’t really need sites with “about:blank” iframes because we can always do as we did above. In other words, it does not matter if bing’s inner iframe was about:blank on not because we ended up setting it as blank with its original domain! I don’t know how you feel bug hunter, but I feel exactly <a href="https://youtu.be/LUDEjulbqzk?t=68">like this</a>.</p>
+<p>The doors are open for us! We can finally run the window.open from our data-meta-data iframe:</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;SOP Bypassed&#34;&gt;window.open(&#34;javascript:alert(document.cookie)&#34;, &#34;CHARLES&#34;); // Fireeeeeeeeeee!!!
+</code></pre><p><img loading="lazy" src="/2017/04/07-bing-likes-cookies.png" alt=""  />
+</p>
+<h2 id="-test-the-poc-live-on-edgehttpunsafecrackingcomardemosedgedatametadatabinghtml-">[ <a href="http://unsafe.cracking.com.ar/demos/edgedatametadata/bing.html">Test the PoC Live on Edge</a> ]<a hidden class="anchor" aria-hidden="true" href="#-test-the-poc-live-on-edgehttpunsafecrackingcomardemosedgedatametadatabinghtml-">#</a></h2>
+<h2 id="-video-in-youtubehttpsyoutubee_6ofcti5kq-">[ <a href="https://youtu.be/E_6OFcTi5kQ">Video in YouTube</a> ]<a hidden class="anchor" aria-hidden="true" href="#-video-in-youtubehttpsyoutubee_6ofcti5kq-">#</a></h2>
+<p>One important thing regarding the PoC, bug hunter: in the sample above we are using an http (insecure) connection because in https the meta refresh to data is blocked so it never redirects to the final data uri. Edge <em>incorrectly thinks</em> that the redirection is insecure. However, this can be easily bypassed by using a document.write. So instead of a data-meta-data it should be document.write(meta-data). Makes sense?</p>
+<p>We are not using it in the PoC above, because when making the demo interactive (making you press buttons to run it) Edge crashes (non-exploitable ) a third of the times. So, I’ve chosen to use a guided and reliable PoC in http vs https automatic. But either way, as we will see below it does not really matter: our insecure domainless page is capable of accessing secure pages. Let’s build a real case.</p>
+<h2 id="a-real-attack-stealing-charles-cookies">A real attack: Stealing Charles cookies<a hidden class="anchor" aria-hidden="true" href="#a-real-attack-stealing-charles-cookies">#</a></h2>
+<p>It is the time to build an attack, bug hunter. Join me into the time machine where we can fly to the past, bringing computers and Internet to the geniuses that preceded us. Charles Darwin is thinking about how species change over time, while Alfred Wallace is having similar ideas. Charles is aware of hackers so he uses his computer in paranoid mode: he never opens a link in using the same browser window where he has his gmail, twitter, and personal documents.</p>
+<p>Take a look, bug hunter. He is opening a new InPrivate window from the task bar!</p>
+<p><img loading="lazy" src="/2017/04/08-paranoid-charles.png" alt=""  />
+</p>
+<p>He is in good mood, to the point that he opens another tab with his Twitter account, and teases Alfred Wallace about who will tweet first.</p>
+<p><img loading="lazy" src="/2017/04/09-charles-tweeting.png" alt=""  />
+</p>
+<p>The response from Wallace came a few hours later, and it included a link with evidence supporting his claims. But remember, Charles did not trust anyone so he copied the link in order to paste it into a new window, away from the one where he had his personal data (gmail, twitter).</p>
+<p><img loading="lazy" src="/2017/04/09-wallace-response.png" alt=""  />
+</p>
+<p>What can go wrong? Everything! Twitter has several iframes, just like most sites in the world. In fact, it has two blank iframes with names, so this should be easier than Bing! But before going back to our story 🙂 let’s enumerate twitter’s iframes using DevTools to find a good candidate. I’m opening a different window here, nothing to do with Charles session.</p>
+<p><img loading="lazy" src="/2017/04/10-twitter-enumeration.png" alt=""  />
+</p>
+<p>Excellent! <strong>dm-post-iframe</strong> looks good, so we have all we need to take over Charlie’s account.</p>
+<p>Charles opened a new inPrivate window and loaded the URL that Wallace sent him. What he didn’t know was that browser windows, even inPrivate, can communicate with each other. So, what will happen if we execute the code below in our domainless iframe?</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Reading Charles cookies&#34;&gt;window.open(&#34;javascript:alert(document.cookie)&#34;, &#34;dm-post-iframe&#34;);
+</code></pre><p>You are totally right. <strong>We have Charles Darwin cookies</strong>.</p>
+<h2 id="20170411-charles-has-cookiespngwp-contentuploads20170411-charles-has-cookiespng-charles-cookiesdiv-classbox-warning--div-classbox-inner-block-warning-the-following-proof-of-concept-will-really-alert-just-show-in-your-screen-your-twitter-cookies-divdiv-test-the-poc-live-on-edgehttpunsafecrackingcomardemosedgedatametadatacookiesfromcharliehtml-"><a href="/wp-content/uploads/2017/04/11-charles-has-cookies.png" title="Charles cookies"><img loading="lazy" src="/2017/04/11-charles-has-cookies.png" alt=""  />
+</a><!-- raw HTML omitted --><!-- raw HTML omitted --> WARNING: the following proof of concept will really alert (just show in your screen) your Twitter cookies. <!-- raw HTML omitted --><!-- raw HTML omitted -->[ <a href="http://unsafe.cracking.com.ar/demos/edgedatametadata/cookiesfromcharlie.html">Test the PoC Live on Edge</a> ]</h2>
+<p>Keep in mind that we don’t really need the InPrivate windows. The example above tries to illustrate a paranoid scenario, but normally things are even easier because people click on links without doing all the work that Charles did to prevent the attack. Also, consider that <a href="https://blog.malwarebytes.com/101/2015/02/what-is-malvertising/">attackers use malvertising</a>, deploying their bad bits inside cheap banners from popular sites. If an attacker is hosted inside a Yahoo banner and the user is logged in into her Twitter account, she will be pwned with no interactions, at all.</p>
+<h2 id="tweeting-like-charles-darwin">Tweeting like Charles Darwin<a hidden class="anchor" aria-hidden="true" href="#tweeting-like-charles-darwin">#</a></h2>
+<p>Let’s build a better PoC. Instead of reading his cookies, we will tweet on his name and even try to grab his password. Keep in mind that most users (like Charlie) use password managers that auto-fill their passwords. Edge password manager is no different, so, if Charles has saved his password, we will get it. It’s not hard, just force him a log out and the log-in page will be automatically loaded, with all his data (username and password) server to us in a silver player. In fact, in this case the form is hidden unless the user interacts, but Edge is filling it anyway so we don’t even have to make the form visible.</p>
+<p>Before running the PoC, consider that it is <strong>your account</strong> the one that will be exposed, not Charles. Nothing is being sent to the network but if there’s somebody behind you, she will see your password in a regular alert dialog. Watch out!</p>
+<h2 id="-video-automatic-tweeting-1httpswwwyoutubecomwatchvk3ui3jxzgnelistpl12o0t84rbx_odmz93nwgngtdiwf-hfuy-">[ <a href="https://www.youtube.com/watch?v=K3Ui3JxZGnE&amp;list=PL12o0t84rBX_oDmz93NwGNgTDiWf-HfUY">Video: Automatic Tweeting 1″</a> ]<a hidden class="anchor" aria-hidden="true" href="#-video-automatic-tweeting-1httpswwwyoutubecomwatchvk3ui3jxzgnelistpl12o0t84rbx_odmz93nwgngtdiwf-hfuy-">#</a></h2>
+<h2 id="-video-manual-tweeting-2httpswwwyoutubecomwatchvplxqbmlrnqalistpl12o0t84rbx_odmz93nwgngtdiwf-hfuy-">[ <a href="https://www.youtube.com/watch?v=PlxQBmLrnQA&amp;list=PL12o0t84rBX_oDmz93NwGNgTDiWf-HfUY">Video: Manual Tweeting 2″</a> ]<a hidden class="anchor" aria-hidden="true" href="#-video-manual-tweeting-2httpswwwyoutubecomwatchvplxqbmlrnqalistpl12o0t84rbx_odmz93nwgngtdiwf-hfuy-">#</a></h2>
+<h2 id="-test-the-poc-live-on-edgehttpunsafecrackingcomardemosedgedatametadatatweet-like-charliehtml-">[ <a href="http://unsafe.cracking.com.ar/demos/edgedatametadata/tweet-like-charlie.html">Test the PoC Live on Edge</a> ]<a hidden class="anchor" aria-hidden="true" href="#-test-the-poc-live-on-edgehttpunsafecrackingcomardemosedgedatametadatatweet-like-charliehtml-">#</a></h2>
+<!-- raw HTML omitted -->
+<p><strong>Can we use this in sites without about:blank iframes?</strong> Of course! We can even do it in sites that don’t have iframes at all. Please, read this post where we <a href="https://www.brokenbrowser.com/referer-spoofing-patch-bypass/">inject an iframe on a different origin</a>. Same <a href="https://www.brokenbrowser.com/uxss-ie-htmlfile/">here on Internet Explorer</a>.</p>
+<p><strong>Is it possible to do the same thing, in Facebook?</strong> I don’t have a facebook account, so I did not test. But a SOP bypass is capable of accessing every single domain in the planet. It could be a little bit harder to exploit, but impossible? Remember the mantra of the <a href="https://www.offensive-security.com/">offensive-security guys</a>: <strong>try harder</strong>.</p>
+<p><strong>Does this work in other browsers?</strong> I did not try, but obviously not. UXSS/SOP bypasses tend to be particular to each browser.</p>
+<!-- raw HTML omitted -->
+<p>The exploit code is easy. Please <a href="https://goo.gl/8UY2y5">get it</a> and take a look, but if you have questions, <a href="https://twitter.com/magicmac2000">ask</a>! I stop here, bug hunter, otherwise this blog will be renamed to brokenmarriage.com 🙂 It’s late night in Buenos Aires, time to be with my wife!</p>
+<p>Have a nice day!</p>
+<p><a href="https://twitter.com/magicmac2000">Manuel</a>.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="/">BrokenBrowser - Fun with browser vulnerabilities</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

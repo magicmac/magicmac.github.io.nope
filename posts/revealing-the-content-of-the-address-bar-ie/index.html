@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Revealing the content of the address bar (IE) | BrokenBrowser - Fun with browser vulnerabilities</title>
+<meta name="keywords" content="">
+<meta name="description" content="Hello fellow bug hunter! Today we are going back to Internet Explorer which despite getting old, tons people still use it. I am much happier with MSRC lately, they are really moving forward regarding Edge, design bugs, and they even extended its bug bounty, which seems to be permanent now.
+All those are good news, but I still believe it is not acceptable to leave IE wide open. For example, right now all IE users can be turned into bots with the zombie script bug (which has been public and unpatched for months).">
+<meta name="author" content="magicmac">
+<link rel="canonical" href="/posts/revealing-the-content-of-the-address-bar-ie/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.6a98292fb8fa8cf0f3ba4042d4b75515c04267550f3ad49ff6271b5af9562443.css" integrity="sha256-apgpL7j6jPDzukBC1LdVFcBCZ1UPOtSf9icbWvlWJEM=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="mask-icon" href="/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Revealing the content of the address bar (IE)" />
+<meta property="og:description" content="Hello fellow bug hunter! Today we are going back to Internet Explorer which despite getting old, tons people still use it. I am much happier with MSRC lately, they are really moving forward regarding Edge, design bugs, and they even extended its bug bounty, which seems to be permanent now.
+All those are good news, but I still believe it is not acceptable to leave IE wide open. For example, right now all IE users can be turned into bots with the zombie script bug (which has been public and unpatched for months)." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/revealing-the-content-of-the-address-bar-ie/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2017-09-26T21:51:19-03:00" />
+<meta property="article:modified_time" content="2017-09-26T21:51:19-03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Revealing the content of the address bar (IE)"/>
+<meta name="twitter:description" content="Hello fellow bug hunter! Today we are going back to Internet Explorer which despite getting old, tons people still use it. I am much happier with MSRC lately, they are really moving forward regarding Edge, design bugs, and they even extended its bug bounty, which seems to be permanent now.
+All those are good news, but I still believe it is not acceptable to leave IE wide open. For example, right now all IE users can be turned into bots with the zombie script bug (which has been public and unpatched for months)."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "/posts/"
+    }
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Revealing the content of the address bar (IE)",
+      "item": "/posts/revealing-the-content-of-the-address-bar-ie/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Revealing the content of the address bar (IE)",
+  "name": "Revealing the content of the address bar (IE)",
+  "description": "Hello fellow bug hunter! Today we are going back to Internet Explorer which despite getting old, tons people still use it. I am much happier with MSRC lately, they are really moving forward regarding Edge, design bugs, and they even extended its bug bounty, which seems to be permanent now.\nAll those are good news, but I still believe it is not acceptable to leave IE wide open. For example, right now all IE users can be turned into bots with the zombie script bug (which has been public and unpatched for months).",
+  "keywords": [
+    
+  ],
+  "articleBody": "Hello fellow bug hunter! Today we are going back to Internet Explorer which despite getting old, tons people still use it. I am much happier with MSRC lately, they are really moving forward regarding Edge, design bugs, and they even extended its bug bounty, which seems to be permanent now.\nAll those are good news, but I still believe it is not acceptable to leave IE wide open. For example, right now all IE users can be turned into bots with the zombie script bug (which has been public and unpatched for months). If you don’t think it’s important, then imagine what black hats can do right now: they can stay in your browser even if you navigate to a different site, which gives them plenty of time to do ugly stuff like mining digital currencies while abusing of users CPUs. Also, IE has its popUp blocker is completely broken and nobody seem to care. Fine, but I think these things should be patched or at least set a big red warning to IE users when they open it, something like “We do not support this browser anymore, use Microsoft Edge“.\nIn my opinion, Microsoft is trying to get rid of IE without saying it. It would be easier, more honest to simply tell users that their older browser is not being serviced like Edge. Current browser stats, according to Netmarketshare show that IE is still more popular than Edge: 17% vs 6%.\nI firmly believe that IE should be treated like Edge in terms of security, otherwise get rid of it completely. Either way, let’s explore another bug on IE that allows attackers to know the address where the user is going. Mind reading? Nope, we know mind reading does not exist, but take a look and see how IE allows us attackers to do what appears to be magic.\nWhen a script is executed inside an object-html tag, the location object will get confused and return the main location instead of its own. To be precise, it will return the text written in the address bar so whatever the user types there will be accessible by the attacker. In a hurry? Take a look at the video and watch how we read what the user types inside IE address-bar!\nObjects and Document Modes Object tags behave differently depending on the documentMode where they are being rendered. For example, if we add the compatibility meta tag at the beginning of a page it will look and behave like an iframe but it will think it is the top window.\n\u003chead\u003e \u003cmeta http-equiv=\"X-UA-Compatible\" content=\"IE=8\" /\u003e \u003c/head\u003e \u003cobject data=\"obj.html\" type=\"text/html\"\u003e\u003c/object\u003e In the code above, “obj.html” is rendered inside the object and the contents are wrapped inside a block similar to an iframe, however, comparing its window object with the top one returns true, when it shouldn’t: it is not the top window. Take a look at the code executed inside the object tag: it thinks window == top, which isn’t really true.\n[ Test it live on IE ] Our object believes it’s the top window, to the point that other members like frameElement return always null, a behavior that only happens on top windows (on IE).\nLet’s try the same code without the compatibility tag. It seems that the object now understands its place in the universe and behaves like an iframe.\n\u003cobject data=\"obj.html\" type=\"text/html\"\u003e\u003c/object\u003e [ Test it live on IE ] Essentially, the object is being rendered as an independent entity in older document modes but as an iframe in newer ones. Regardless of that, internally both are WebBrowser controls, Trident engines exposing the same members.\nInherited window members Let’s set back an older documentMode and find a way to exploit this confusion-bug which does not seem to be that bad because cross-domain restrictions are still in place, and the X-FRAME-OPTIONS header works perfectly well. There are members like window.name which are inherited by the object (the object inherits the name of its parent) but that’s not super-bad except for specific advertising technologies which insecurely use the window.name to pass information across iframes.\nHaving said that, there’s at least one inherited object that really causes trouble: location. Inside an object tag, location.href will return the location of the main (top) window. The code below renders the object with its source pointing to object_location.html, but when we retrieve its location it returns the top instead.\n[ Test it live on IE ] Again, this confusion-bug is not useful because we are still on the same domain. Even if we can retrieve -thanks to the confusion- the location of the top, as long as we are on the same domain things are not exciting. By the way bug hunter, I tried for a few minutes to change the location of the object, but no success. If you want to research on this area I would suggest going deeper because I believe it should be possible. Regardless of that, while trying to achieve a UXSS (persistence is key for everything in life) an interesting bug stumbled upon me: when the object is injected onbeforeunload what we get is not the top location anymore, but the location that the browser is going to or, what’s currently written into the address bar.\nIn other words, if we retrieve the location.href of the object while the user is leaving the main page, we will be able to know what was typed into the address-bar, or, if the user clicked on a link we will know the address of the link that the browser is going to.\nFor our testing purposes, we will just interrupt the loading of the new site and show the URL to the user. Of course, an attacker would simply post-back the address and load the site anyway making this transparent to the user. Let’s do a simple document.write of the object while the user is leaving.\nwindow.onbeforeunload = function() { document.write(''); document.close(); } And read the location at that precise moment (onbeforeunload).\ndocument.write(\"Let me read your mind. You wanted to go here: \" + location.href); That’s it! Now we will retrieve the object location when the user is leaving and know exactly what she typed into the address bar. It does not have to be a full URL, for example, if the user types words into the address bar, it will automatically be converted to a search query URL (Bing by default on IE) which can of course be completely read!\n[ Test it live on IE ] or [ Watch the Video ] Have a nice day, and keep pushing into this object! I’m sure there are tons of things to be discovered.\nManuel.\n",
+  "wordCount" : "1129",
+  "inLanguage": "en",
+  "datePublished": "2017-09-26T21:51:19-03:00",
+  "dateModified": "2017-09-26T21:51:19-03:00",
+  "author":{
+    "@type": "Person",
+    "name": "magicmac"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/posts/revealing-the-content-of-the-address-bar-ie/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "BrokenBrowser - Fun with browser vulnerabilities",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="/" accesskey="h" title="BrokenBrowser - Fun with browser vulnerabilities (Alt + H)">BrokenBrowser - Fun with browser vulnerabilities</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Revealing the content of the address bar (IE)
+    </h1>
+    <div class="post-meta"><span title='2017-09-26 21:51:19 -0300 -03'>September 26, 2017</span>&nbsp;·&nbsp;magicmac
+
+</div>
+  </header> 
+  <div class="post-content"><p>Hello fellow bug hunter! Today we are going back to Internet Explorer which despite getting old, tons people still use it. I am much happier with <a href="https://twitter.com/msftsecresponse">MSRC</a> lately, they are really moving forward regarding Edge, design bugs, and they even extended its <a href="https://blogs.technet.microsoft.com/msrc/2017/06/21/extending-the-microsoft-edge-bounty-program/">bug bounty, which seems to be permanent now</a>.</p>
+<p>All those are good news, but I still believe it is not acceptable to leave IE wide open. For example, right now all IE users can be turned into bots with the <a href="https://www.brokenbrowser.com/zombie-alert/">zombie script bug</a> (which has been public and unpatched for months). If you don’t think it’s important, then imagine what black hats can do right now: they can<a href="https://www.brokenbrowser.com/zombie-alert/"> stay in your browser even if you navigate to a different site</a>, which gives them plenty of time to do ugly stuff like <a href="https://blog.malwarebytes.com/threat-analysis/2017/09/drive-by-mining-and-ads-the-wild-wild-west/">mining digital currencies while abusing of users CPUs</a>. Also, IE has its <a href="https://www.cracking.com.ar/demos/iepopups/">popUp blocker is completely broken</a> and nobody seem to care. Fine, but I think these things should be patched or at least set a big red warning to IE users when they open it, something like “<em>We do not support this browser anymore, use Microsoft Edge</em>“.</p>
+<p>In my opinion, Microsoft is trying to get rid of IE without saying it. It would be easier, more honest to simply tell users that their older browser is not being serviced like Edge. Current browser stats, according to <a href="https://www.netmarketshare.com/browser-market-share.aspx?qprid=0&amp;qpcustomd=0&amp;qpcustomb=&amp;qpsp=2017&amp;qpnp=1&amp;qptimeframe=Y">Netmarketshare</a> show that IE is still more popular than Edge: 17% vs 6%.</p>
+<p>I firmly believe that IE should be treated like Edge in terms of security, otherwise get rid of it completely. Either way, let’s explore another bug on IE that allows attackers to know the address where the user is going. Mind reading? Nope, we know mind reading does not exist, but take a look and see how IE allows us attackers to do what appears to be magic.</p>
+<!-- raw HTML omitted -->
+<p>When a script is executed inside an object-html tag, the location object will get confused and return the main location instead of its own. To be precise, it will return the text written in the address bar so whatever the user types there will be accessible by the attacker. In a hurry? Take a look at the <a href="https://www.youtube.com/watch?v=xyzd7PLqAV8&amp;list=PL12o0t84rBX_oDmz93NwGNgTDiWf-HfUY">video and watch how we read what the user types inside IE address-bar</a>!</p>
+<h2 id="objects-and-document-modes">Objects and Document Modes<a hidden class="anchor" aria-hidden="true" href="#objects-and-document-modes">#</a></h2>
+<p>Object tags behave differently depending on the documentMode where they are being rendered. For example, if we add the compatibility meta tag at the beginning of a page it will look and behave like an iframe but it will <strong>think it is the top window</strong>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span>&lt;<span style="color:#f92672">head</span>&gt;
+</span></span><span style="display:flex;"><span>  <span style="color:#75715e">&lt;!-- COMPATIBILITY META TAG --&gt;</span>
+</span></span><span style="display:flex;"><span>  &lt;<span style="color:#f92672">meta</span> <span style="color:#a6e22e">http-equiv</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;X-UA-Compatible&#34;</span> <span style="color:#a6e22e">content</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;IE=8&#34;</span> /&gt;
+</span></span><span style="display:flex;"><span>&lt;/<span style="color:#f92672">head</span>&gt;
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">object</span> <span style="color:#a6e22e">data</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;obj.html&#34;</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text/html&#34;</span>&gt;&lt;/<span style="color:#f92672">object</span>&gt;
+</span></span></code></pre></div><p>In the code above, “obj.html” is rendered inside the object and the contents are wrapped inside a block similar to an iframe, however, comparing its window object with the top one returns true, when it shouldn’t: it is not the top window. Take a look at the code executed inside the object tag: it thinks <strong>window == top</strong>, which isn’t really true.</p>
+<p><img loading="lazy" src="/2017/06/02_docmode8.png" alt=""  />
+</p>
+<h3 id="-test-it-live-on-iehttpswwwcrackingcomardemosieaddressbarguessdocmode8html-">[ <a href="https://www.cracking.com.ar/demos/ieaddressbarguess/docmode8.html">Test it live on IE</a> ]<a hidden class="anchor" aria-hidden="true" href="#-test-it-live-on-iehttpswwwcrackingcomardemosieaddressbarguessdocmode8html-">#</a></h3>
+<p>Our object believes it’s the top window, to the point that other members like frameElement return always null, a behavior that only happens on top windows (on IE).</p>
+<p>Let’s try the same code without the compatibility tag. It seems that the object now understands its place in the universe and behaves like an iframe.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-html" data-lang="html"><span style="display:flex;"><span><span style="color:#75715e">&lt;!-- COMPATIBILITY META TAG REMOVED --&gt;</span>
+</span></span><span style="display:flex;"><span>&lt;<span style="color:#f92672">object</span> <span style="color:#a6e22e">data</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;obj.html&#34;</span> <span style="color:#a6e22e">type</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;text/html&#34;</span>&gt;&lt;/<span style="color:#f92672">object</span>&gt;
+</span></span></code></pre></div><p><img loading="lazy" src="/2017/06/03_docmode11.png" alt=""  />
+</p>
+<h3 id="-test-it-live-on-iehttpswwwcrackingcomardemosieaddressbarguessdocmode11html-">[ <a href="https://www.cracking.com.ar/demos/ieaddressbarguess/docmode11.html">Test it live on IE</a> ]<a hidden class="anchor" aria-hidden="true" href="#-test-it-live-on-iehttpswwwcrackingcomardemosieaddressbarguessdocmode11html-">#</a></h3>
+<p>Essentially, the object is being rendered as an independent entity in older document modes but as an iframe in newer ones. Regardless of that, internally both are <a href="https://msdn.microsoft.com/en-us/library/aa752040(v=vs.85).aspx">WebBrowser controls</a>, Trident engines exposing the same members.</p>
+<h2 id="inherited-window-members">Inherited window members<a hidden class="anchor" aria-hidden="true" href="#inherited-window-members">#</a></h2>
+<p>Let’s set back an older documentMode and find a way to exploit this confusion-bug which does not seem to be <em>that bad</em> because cross-domain restrictions are still in place, and the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options">X-FRAME-OPTIONS</a> header works perfectly well. There are members like <strong>window.name</strong> which are inherited by the object (the object inherits the name of its parent) but that’s not super-bad except for specific advertising technologies which insecurely use the window.name to pass information across iframes.</p>
+<p>Having said that, there’s at least one inherited object that really causes trouble: <strong>location</strong>. Inside an object tag, location.href will return the location of the main (top) window. The code below renders the object with its source pointing to <strong>object_location.html</strong>, but when we retrieve its location it returns the top instead.</p>
+<p><img loading="lazy" src="/2017/06/04_location_confusion.png" alt=""  />
+</p>
+<h3 id="-test-it-live-on-iehttpswwwcrackingcomardemosieaddressbarguesstop_locationhtml-">[ <a href="https://www.cracking.com.ar/demos/ieaddressbarguess/top_location.html">Test it live on IE</a> ]<a hidden class="anchor" aria-hidden="true" href="#-test-it-live-on-iehttpswwwcrackingcomardemosieaddressbarguesstop_locationhtml-">#</a></h3>
+<p>Again, this confusion-bug is not useful because we are still on the same domain. Even if we can retrieve -thanks to the confusion- the location of the top, as long as we are on the same domain things are not exciting. By the way bug hunter, I tried for a few minutes to change the location of the object, but no success. If you want to research on this area I would suggest going deeper because I believe it should be possible. Regardless of that, while trying to achieve a <strong>UXSS</strong> (persistence is key for everything in life) an interesting bug stumbled upon me: when the object is injected <strong>onbeforeunload</strong> what we get is not the top location anymore, but the location that the browser is going to or, what’s currently written into the address bar.</p>
+<p>In other words, if we <strong>retrieve the location.href of the object while the user is leaving the main page, we will be able to know what was typed into the address-bar</strong>, or, if the user clicked on a link we will know the address of the link that the browser is going to.</p>
+<p>For our testing purposes, we will just interrupt the loading of the new site and show the URL to the user. Of course, an attacker would simply post-back the address and load the site anyway making this transparent to the user. Let’s do a simple document.write of the object while the user is leaving.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>window.<span style="color:#a6e22e">onbeforeunload</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span>()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>  document.<span style="color:#a6e22e">write</span>(<span style="color:#e6db74">&#39;&lt;object data=&#34;loc.html&#34; type=&#34;text/html&#34; width=&#34;800&#34; height=&#34;300&#34;&gt;&lt;/object&gt;&#39;</span>);
+</span></span><span style="display:flex;"><span>  document.<span style="color:#a6e22e">close</span>();
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>And read the location at that precise moment (onbeforeunload).</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-javascript" data-lang="javascript"><span style="display:flex;"><span>document.<span style="color:#a6e22e">write</span>(<span style="color:#e6db74">&#34;Let me read your mind. You wanted to go here: &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">location</span>.<span style="color:#a6e22e">href</span>);
+</span></span></code></pre></div><p>That’s it! Now we will retrieve the object location when the user is leaving and know exactly what she typed into the address bar. It does not have to be a full URL, for example, if the user types words into the address bar, it will automatically be converted to a search query URL (Bing by default on IE) which can of course be completely read!</p>
+<p><img loading="lazy" src="/2017/09/address_bar_guess.png" alt=""  />
+</p>
+<h3 id="-test-it-live-on-iehttpswwwcrackingcomardemosieaddressbarguess--or--watch-the-videohttpswwwyoutubecomwatchvxyzd7plqav8listpl12o0t84rbx_odmz93nwgngtdiwf-hfuy-">[ <a href="https://www.cracking.com.ar/demos/ieaddressbarguess/">Test it live on IE</a> ] or [ <a href="https://www.youtube.com/watch?v=xyzd7PLqAV8&amp;list=PL12o0t84rBX_oDmz93NwGNgTDiWf-HfUY">Watch the Video</a> ]<a hidden class="anchor" aria-hidden="true" href="#-test-it-live-on-iehttpswwwcrackingcomardemosieaddressbarguess--or--watch-the-videohttpswwwyoutubecomwatchvxyzd7plqav8listpl12o0t84rbx_odmz93nwgngtdiwf-hfuy-">#</a></h3>
+<p>Have a nice day, and keep pushing into this object! I’m sure there are tons of things to be discovered.</p>
+<p><a href="https://twitter.com/magicmac2000">Manuel</a>.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="/">BrokenBrowser - Fun with browser vulnerabilities</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

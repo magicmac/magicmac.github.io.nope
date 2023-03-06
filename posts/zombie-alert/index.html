@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>The Attack of the Alerts and the Zombie Script (IE) | BrokenBrowser - Fun with browser vulnerabilities</title>
+<meta name="keywords" content="">
+<meta name="description" content="In our previous post we found a way to UXSS (bypass the SOP policy) using the htmlFile/ActiveXObject, however, I mentioned that there were other interesting things to do using that same object. Have you tried anything? If yes, congratulations. The only way to find bugs is by trying, and today we are going to explore another interesting thing that can be done with the same ActiveXObject.
+Have you noted recently that all browsers have a feature to block perpetual alerts?">
+<meta name="author" content="magicmac">
+<link rel="canonical" href="/posts/zombie-alert/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.6a98292fb8fa8cf0f3ba4042d4b75515c04267550f3ad49ff6271b5af9562443.css" integrity="sha256-apgpL7j6jPDzukBC1LdVFcBCZ1UPOtSf9icbWvlWJEM=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="mask-icon" href="/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="The Attack of the Alerts and the Zombie Script (IE)" />
+<meta property="og:description" content="In our previous post we found a way to UXSS (bypass the SOP policy) using the htmlFile/ActiveXObject, however, I mentioned that there were other interesting things to do using that same object. Have you tried anything? If yes, congratulations. The only way to find bugs is by trying, and today we are going to explore another interesting thing that can be done with the same ActiveXObject.
+Have you noted recently that all browsers have a feature to block perpetual alerts?" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="/posts/zombie-alert/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2017-02-20T14:51:18-03:00" />
+<meta property="article:modified_time" content="2017-02-20T14:51:18-03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="The Attack of the Alerts and the Zombie Script (IE)"/>
+<meta name="twitter:description" content="In our previous post we found a way to UXSS (bypass the SOP policy) using the htmlFile/ActiveXObject, however, I mentioned that there were other interesting things to do using that same object. Have you tried anything? If yes, congratulations. The only way to find bugs is by trying, and today we are going to explore another interesting thing that can be done with the same ActiveXObject.
+Have you noted recently that all browsers have a feature to block perpetual alerts?"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "/posts/"
+    }
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "The Attack of the Alerts and the Zombie Script (IE)",
+      "item": "/posts/zombie-alert/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "The Attack of the Alerts and the Zombie Script (IE)",
+  "name": "The Attack of the Alerts and the Zombie Script (IE)",
+  "description": "In our previous post we found a way to UXSS (bypass the SOP policy) using the htmlFile/ActiveXObject, however, I mentioned that there were other interesting things to do using that same object. Have you tried anything? If yes, congratulations. The only way to find bugs is by trying, and today we are going to explore another interesting thing that can be done with the same ActiveXObject.\nHave you noted recently that all browsers have a feature to block perpetual alerts?",
+  "keywords": [
+    
+  ],
+  "articleBody": "In our previous post we found a way to UXSS (bypass the SOP policy) using the htmlFile/ActiveXObject, however, I mentioned that there were other interesting things to do using that same object. Have you tried anything? If yes, congratulations. The only way to find bugs is by trying, and today we are going to explore another interesting thing that can be done with the same ActiveXObject.\nHave you noted recently that all browsers have a feature to block perpetual alerts? As soon as you execute a second alert it comes with a check-box to disable the following ones, just like this:\nThis gives us (bad programmers) the chance to exit never ending alert-loops, but more important, it allows the user to defend himself against malicious pages that literally block the interface with fake messages. Users have now the chance to block all the following alerts by checking that box, but with the ActiveX window object we can continue throwing infinite alerts with no way to escape them. If you haven’t read the previous post about the UXSS using htmlFile/ActiveXObject, please do it now. It’s important to understand why we are using specific members of this htmlFile/ActiveX (like how to get its window object). Anyway, let’s use the alert method from the ActiveXObject which completely bypasses the preference of the user of “no more alerts please!”. We can throw infinite ones but for this demo we will do it with just three.\ndoc = new ActiveXObject(\"htmlFile\"); win = doc.Script; // win is the window object of the ActiveXObject win.alert(\"Hello\"); win.alert(\"2nd alert, no option to block me.\"); win.alert(\"3rd alert, and still no way out!\"); Honestly, I’m not impressed at all. Yeah yeah, unlimited alerts but it’s no big deal considering that other security researchers are bypassing DEP / CFG and re-enabling the God Mode. Let’s try something better. We will throw a few alerts but all visible at once, filling the entire screen with thousands them! No worries, in this PoC we will use just ten!\nfor (var i = 0; i \u003c 10; i++) { doc = new ActiveXObject(\"htmlFile\"); win = doc.Script; // win is the window object of the ActiveXObject win.setTimeout(\"alert('Hello, world!')\", i * 100); } ### [ See the PoC Live on IE11 ]\nWow! This is not impressive, but it will keep the user and those amazing researchers busy . Click click click 🙂 . I know alerts are not interesting and let’s be honest, once the user has a chance to leave the page, he will be free from our horrible alerts, right? Wrong! We can be persistent and continue running our code even after he left our page. Imagine a user who goes to Google trying to escape from us, but continues to receive our alerts! Hehe 🙂 Let’s do it, it’s not hard at all.\nPersistent Code In order to make our code persistent (or a zombie script as some people call it), we need to keep a reference to the object that runs the script and make a call the window.open method. Those two things will make IE think it should not destroy the object because there’s still a reference to it. The good thing is that the reference can be in the object itself!\nSave a reference to the ActiveXObject. Use the window.open method. Just one more thing: keep in mind that using the window.open method does not mean that we need to literally open a window/tab. In fact, we will use a very simple/old trick which apparently does nothing: window.open into the same window with an empty URL.\ndoc = new ActiveXObject(\"htmlFile\"); // Alert every 5 seconds doc.Script.setInterval(\"alert('Hello, world!')\", 5000); // Save a self-reference doc.Script.doc = doc; // Use the open method. Nothing changes here, but now IE will not // destroy the previous reference and the script will continue running. window.open(\"\",\"_self\"); // \"Does nothing\", but this line is crucial. That’s it! Now the user can type anything in the address-bar, click on links or navigate as much as she wants, but our script will always be with her until the tab is closed. And by the way, everything here can be done straight from inside an iframe on a different domain, and still work (without bypassing SOP, of course).\n### [ See the PoC Live on IE11 ]\nWow! This is amazing! The setInterval keeps running even after leaving our page! Navigate, try it by yourself! Is there a way to combine the previous UXSS with this bug and have UXSS everywhere? Can we know where exactly the user is or the URL in the address bar? Check out this video where I was just teasing Eric because of a Twitter conversation that we were having.\nTip: the window.open trick that we did is useful for other things too. For example, if we run it against the top window (not matter how deeply framed we are), then, IE thinks the main window was opened with scripting and it allows us to close it without confirmations, just like this:\nw = window.open(\"\",\"_top\"); // IE thinks the top was open with scripting w.close(); // Now we can close it without confirmation Have a nice day full of passion, bug hunter!\nManuel.\n",
+  "wordCount" : "916",
+  "inLanguage": "en",
+  "datePublished": "2017-02-20T14:51:18-03:00",
+  "dateModified": "2017-02-20T14:51:18-03:00",
+  "author":{
+    "@type": "Person",
+    "name": "magicmac"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/posts/zombie-alert/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "BrokenBrowser - Fun with browser vulnerabilities",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="/" accesskey="h" title="BrokenBrowser - Fun with browser vulnerabilities (Alt + H)">BrokenBrowser - Fun with browser vulnerabilities</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      The Attack of the Alerts and the Zombie Script (IE)
+    </h1>
+    <div class="post-meta"><span title='2017-02-20 14:51:18 -0300 -03'>February 20, 2017</span>&nbsp;·&nbsp;magicmac
+
+</div>
+  </header> 
+  <div class="post-content"><p>In our previous post we found a way to <a href="https://www.brokenbrowser.com/uxss-ie-htmlfile/">UXSS (bypass the SOP policy) using the htmlFile/ActiveXObject</a>, however, I mentioned that there were other interesting things to do using that same object. Have you tried anything? If yes, congratulations. The only way to find bugs is by trying, and today we are going to explore another interesting thing that can be done with the same ActiveXObject.</p>
+<p>Have you noted recently that all browsers have a feature to block perpetual alerts? As soon as you execute a second alert it comes with a check-box to disable the following ones, just like this:</p>
+<p><a href="/wp-content/uploads/2017/02/01_alert_with_checkbox.png" title="alert with checkbox"><img loading="lazy" src="/2017/02/01_alert_with_checkbox.png" alt=""  />
+</a>This gives us (bad programmers) the chance to exit never ending alert-loops, but more important, it allows the user to defend himself against malicious pages that literally block the interface with fake messages. Users have now the chance to block all the following alerts by checking that box, but with the ActiveX window object we can continue throwing infinite alerts with no way to escape them. If you haven’t read the previous post about the <a href="https://www.brokenbrowser.com/uxss-ie-htmlfile/">UXSS using htmlFile/ActiveXObject</a>, please do it now. It’s important to understand why we are using specific members of this htmlFile/ActiveX (like how to get its window object). Anyway, let’s use the alert method from the ActiveXObject which completely bypasses the preference of the user of “no more alerts please!”. We can throw infinite ones but for this demo we will do it with just three.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Alerts can&#39;t be disabled&#34;&gt;doc = new ActiveXObject(&#34;htmlFile&#34;);
+win = doc.Script; // win is the window object of the ActiveXObject
+win.alert(&#34;Hello&#34;);
+win.alert(&#34;2nd alert, no option to block me.&#34;);
+win.alert(&#34;3rd alert, and still no way out!&#34;);
+</code></pre><p><a href="/wp-content/uploads/2017/02/02_alert_without_checkbox.png" title="alerts without checkbox"><img loading="lazy" src="/2017/02/02_alert_without_checkbox.png" alt=""  />
+</a>Honestly, I’m not impressed at all. Yeah yeah, unlimited alerts but it’s no big deal considering that other security researchers are <a href="http://xlab.tencent.com/en/2015/12/09/bypass-dep-and-cfg-using-jit-compiler-in-chakra-engine/">bypassing DEP / CFG</a> and <a href="http://gsec.hitb.org/sg2016/sessions/look-mom-i-dont-use-shellcode-a-browser-exploitation-case-study-for-internet-explorer-11/">re-enabling the God Mode</a>. Let’s try something better. We will throw a few alerts but all visible at once, filling the entire screen with thousands them! No worries, in this PoC we will use just ten!</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Multiple alerts visible at the same time&#34;&gt;for (var i = 0; i &lt; 10; i++)
+{
+   doc = new ActiveXObject(&#34;htmlFile&#34;);
+   win = doc.Script; // win is the window object of the ActiveXObject
+   win.setTimeout(&#34;alert(&#39;Hello, world!&#39;)&#34;, i * 100);
+}
+</code></pre><p><a href="/wp-content/uploads/2017/02/03_alert_ad_infinitum.png" title="alerts ad-infinitum"><img loading="lazy" src="/2017/02/03_alert_ad_infinitum.png" alt=""  />
+</a>### [ <a href="https://www.cracking.com.ar/demos/zombiealert/">See the PoC Live on IE11</a> ]</p>
+<p>Wow! This is not impressive, but it will keep the user and those amazing researchers busy . Click click click 🙂 . I know alerts are not interesting and let’s be honest, once the user has a chance to leave the page, he will be free from our horrible alerts, right? Wrong! We can be persistent and continue running our code <strong>even</strong> after he left our page. Imagine a user who goes to Google trying to escape from us, but continues to receive our alerts! Hehe 🙂 Let’s do it, it’s not hard at all.</p>
+<h2 id="persistent-code">Persistent Code<a hidden class="anchor" aria-hidden="true" href="#persistent-code">#</a></h2>
+<p>In order to make our code persistent (or a <em>zombie script</em> as some people call it), we need to keep a reference to the object that runs the script and <strong>make a call the window.open method</strong>. Those two things will make IE think it should not destroy the object because there’s still a reference to it. The good thing is that the reference can be in the object itself!</p>
+<ol>
+<li>Save a reference to the ActiveXObject.</li>
+<li>Use the window.open method.</li>
+</ol>
+<p>Just one more thing: keep in mind that using the window.open method <strong>does not mean</strong> that we need to literally open a window/tab. In fact, we will use a very simple/old trick which <em>apparently</em> does nothing: window.open into the same window <!-- raw HTML omitted -->with an empty URL<!-- raw HTML omitted -->.</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Zombie Script&#34;&gt;doc = new ActiveXObject(&#34;htmlFile&#34;);
+
+// Alert every 5 seconds
+doc.Script.setInterval(&#34;alert(&#39;Hello, world!&#39;)&#34;, 5000);
+
+// Save a self-reference
+doc.Script.doc = doc;
+
+// Use the open method. Nothing changes here, but now IE will not
+// destroy the previous reference and the script will continue running.
+window.open(&#34;&#34;,&#34;_self&#34;); // &#34;Does nothing&#34;, but this line is crucial.
+</code></pre><p>That’s it! Now the user can type anything in the address-bar, click on links or navigate as much as she wants, but our script will always be with her until the tab is closed. And by the way, everything here can be done straight from inside an iframe on a different domain, and still work (without bypassing SOP, of course).</p>
+<p><a href="/wp-content/uploads/2017/02/04_zombie_script-2.png" title="Zombie Script"><img loading="lazy" src="/2017/02/04_zombie_script-2.png" alt=""  />
+</a>### [ <a href="https://www.cracking.com.ar/demos/zombiealert/">See the PoC Live on IE11</a> ]</p>
+<p>Wow! This is amazing! The setInterval keeps running even after leaving our page! Navigate, try it by yourself! Is there a way to combine the <a href="https://www.brokenbrowser.com/uxss-ie-htmlfile/">previous UXSS</a> with this bug and have UXSS everywhere? Can we know where <strong>exactly</strong> the user is or the URL in the address bar? <a href="https://www.youtube.com/watch?v=QJeiuDzCJjM">Check out this video</a> where I was just teasing <a href="https://twitter.com/ericlaw">Eric</a> because of a Twitter conversation that we were having.</p>
+<p><strong><!-- raw HTML omitted -->Tip<!-- raw HTML omitted -->:</strong> the window.open trick that we did is useful for other things too. For example, if we run it against the top window (not matter how deeply framed we are), then, IE thinks the main window was opened with scripting and it allows us to close it without confirmations, just like this:</p>
+<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Close without warnings&#34;&gt;w = window.open(&#34;&#34;,&#34;_top&#34;); // IE thinks the top was open with scripting
+w.close();   // Now we can close it without confirmation
+</code></pre><p>Have a nice day full of passion, bug hunter!</p>
+<p><a href="https://twitter.com/magicmac2000">Manuel</a>.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="/">BrokenBrowser - Fun with browser vulnerabilities</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>

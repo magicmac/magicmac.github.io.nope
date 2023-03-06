@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Posts on BrokenBrowser - Fun with browser vulnerabilities</title>
+    <link>/posts/</link>
+    <description>Recent content in Posts on BrokenBrowser - Fun with browser vulnerabilities</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 26 Sep 2017 21:51:19 -0300</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Revealing the content of the address bar (IE)</title>
+      <link>/posts/revealing-the-content-of-the-address-bar-ie/</link>
+      <pubDate>Tue, 26 Sep 2017 21:51:19 -0300</pubDate>
+      
+      <guid>/posts/revealing-the-content-of-the-address-bar-ie/</guid>
+      <description>Hello fellow bug hunter! Today we are going back to Internet Explorer which despite getting old, tons people still use it. I am much happier with MSRC lately, they are really moving forward regarding Edge, design bugs, and they even extended its bug bounty, which seems to be permanent now.
+All those are good news, but I still believe it is not acceptable to leave IE wide open. For example, right now all IE users can be turned into bots with the zombie script bug (which has been public and unpatched for months).</description>
+    </item>
+    
+    <item>
+      <title>Patching Time Google Chrome vs Microsoft Edge</title>
+      <link>/posts/p1555/</link>
+      <pubDate>Fri, 19 May 2017 11:40:50 -0300</pubDate>
+      
+      <guid>/posts/p1555/</guid>
+      <description>This week I’ve been trying to build code to detect a particular type of fraud. Basically, I needed the code to be hidden from a fraudster using Burp/Fiddler or the network tab in Chrome. The original idea was to load a JavaScript that was going be shown as a GIF/PNG with a sniffer, and this needed to work in Chrome. I was testing on Chrome Canary [60.0.3103.0] because I wanted to make sure the trick worked also in the next versions of Chrome.</description>
+    </item>
+    
+    <item>
+      <title>Bugs List</title>
+      <link>/posts/bugs-list/</link>
+      <pubDate>Fri, 12 May 2017 09:04:17 -0300</pubDate>
+      
+      <guid>/posts/bugs-list/</guid>
+      <description>Below is the list of recently found bugs. Scroll to the right to access the links with the PoCs or if you prefer a better view go straight to the Google Docs Sheet: List of Vulnerabilities.
+If you find a bug has been fixed, please let me know. Thanks!</description>
+    </item>
+    
+    <item>
+      <title>SOP bypass / UXSS - Stealing Credentials Pretty Fast (Edge)</title>
+      <link>/posts/sop-bypass-uxss-stealing-credentials-pretty-fast/</link>
+      <pubDate>Wed, 10 May 2017 16:12:23 -0300</pubDate>
+      
+      <guid>/posts/sop-bypass-uxss-stealing-credentials-pretty-fast/</guid>
+      <description>Today we are going to steal Twitter and Facebook credentials from the user. The previous two SOP bypasses [1] [2] that allowed attackers to steal passwords and cookies were not patched in the latest update and this new one is more direct, easier and faster.
+Charles -our fictional hacked user- has obediently updated Windows last Tuesday and even changed his password, but he is not aware that the update did not fix the previous two issues (so he is still unprotected) and that there’s a new way to steal his most precious information.</description>
+    </item>
+    
+    <item>
+      <title>SOP bypass / UXSS - Tweeting like Charles Darwin (Edge)</title>
+      <link>/posts/sop-bypass-uxss-tweeting-like-charles-darwin/</link>
+      <pubDate>Mon, 24 Apr 2017 09:44:46 -0300</pubDate>
+      
+      <guid>/posts/sop-bypass-uxss-tweeting-like-charles-darwin/</guid>
+      <description>Watch the 2 minutes exploit video where we manually tweet as if we were Charles Darwin, and get his password (thanks to the default password manager of Microsoft Edge). If you are out of time, watch the 1 minute video where we do the same thing, automatically.
+Charles Darwin is an example, this Microsoft Edge vulnerability allows the attacker to tweet or do anything (password anyone?) from many websites on behalf of the logged user.</description>
+    </item>
+    
+    <item>
+      <title>SOP bypass courtesy of the reading mode (Edge)</title>
+      <link>/posts/sop-bypass-abusing-read-protocol/</link>
+      <pubDate>Mon, 17 Apr 2017 09:06:58 -0300</pubDate>
+      
+      <guid>/posts/sop-bypass-abusing-read-protocol/</guid>
+      <description>The Microsoft Edge team recently tweeted about the reading mode, a feature that removes the clutter from webpages to read without distractions. It was not new to me, I learned about it when I was trying to understand how pseudo-protocols worked on Edge but I never played with it before, until that tweet reminded me its existence. If you are in a hurry watch the video PoC, otherwise, read below.</description>
+    </item>
+    
+    <item>
+      <title>Detecting Installed Extensions (Edge)</title>
+      <link>/posts/microsoft-edge-detecting-installed-extensions/</link>
+      <pubDate>Thu, 06 Apr 2017 12:46:13 -0300</pubDate>
+      
+      <guid>/posts/microsoft-edge-detecting-installed-extensions/</guid>
+      <description>Attackers love being able to fingerprint their victims. We’ve seen in the past two techniques that allowed the bad guys to detect the presence of particular files (to evade analysts) and even get the application names associated to specific mimeTypes. Microsoft patched those ones and other variations but today we are going to see how to detect browser extensions installed on Edge.
+Yesterday, Nataliia Bielova tweeted about a site that shows how extensions can be detected on different browsers, however, Microsoft Edge is excluded.</description>
+    </item>
+    
+    <item>
+      <title>Defeating the popUp blocker, the XSS filter and SuperNavigate with our fake ticket to the Intranet Zone (Edge)</title>
+      <link>/posts/free-ticket-to-the-intranet-zone/</link>
+      <pubDate>Fri, 31 Mar 2017 19:19:01 -0300</pubDate>
+      
+      <guid>/posts/free-ticket-to-the-intranet-zone/</guid>
+      <description>Last year we explored the domainless blank technique to create UXSS/SOP bypasses on both Microsoft Edge and Internet Explorer. The Edge version has been recently patched but unfortunately the fix introduces a new security issue which allows attackers to exploit other things. In other words, the patch kills a bug but creates another one*.*
+In a hurry? Watch the 35 sec video where we quickly show what can be done with this vulnerability.</description>
+    </item>
+    
+    <item>
+      <title>Referrer spoofing with iframe injection (Edge)</title>
+      <link>/posts/referer-spoofing-patch-bypass/</link>
+      <pubDate>Fri, 24 Mar 2017 02:52:28 -0300</pubDate>
+      
+      <guid>/posts/referer-spoofing-patch-bypass/</guid>
+      <description>Last year we’ve been playing with a very simple method to spoof the referrer on Edge, which allowed us of course to spoof the referrer and -as a bonus- other neat things like bypass the XSS filter.
+Today I found out that it was patched, so I decided to give it a try and find a way around the patch. Honestly I don’t feel it’s a bypass but clearly a variation.</description>
+    </item>
+    
+    <item>
+      <title>SOP bypass / UXSS - More Adventures in a Domainless World (IE)</title>
+      <link>/posts/uxss-ie-domainless-world/</link>
+      <pubDate>Mon, 20 Mar 2017 01:19:12 -0300</pubDate>
+      
+      <guid>/posts/uxss-ie-domainless-world/</guid>
+      <description>A few months ago we’ve been playing with domainless about:blank pages on Edge. Essentially, a powerful about:blank document was capable of accessing every domain without restrictions. It was recently patched as CVE-2017-0002 so it does not work anymore. The same thing happens with the ActiveXObject/htmlFile (from now on, htmlFile) which was patched last week as CVE-2017-0154.
+If you haven’t read those two methods to achieve UXSS/SOP bypass, please do it now because what’s coming assumes that we are familiar with them.</description>
+    </item>
+    
+    <item>
+      <title>Bypassing the patch to keep spoofing the Smartscreen/Malware warning (Edge)</title>
+      <link>/posts/bypass-the-patch-to-keep-spoofing-the-address-bar-with-the-malware-warning/</link>
+      <pubDate>Wed, 15 Mar 2017 21:39:02 -0300</pubDate>
+      
+      <guid>/posts/bypass-the-patch-to-keep-spoofing-the-address-bar-with-the-malware-warning/</guid>
+      <description>Yesterday, Microsoft pushed a gigantic update where tons of security bugs were fortunately killed, including most ones from this website. Kudos, big kudos to the Edge developers and the ones in charge of its security. Please, convince the ones who want to keep the ridiculous IE policies to change their minds or at least publicly explain why they don’t care about IE, at all. Kill it or protect it.
+Bug hunter, if you haven’t seen the original bug, please do so before reading the post below which explains how to bypass the patch.</description>
+    </item>
+    
+    <item>
+      <title>The Attack of the Alerts and the Zombie Script (IE)</title>
+      <link>/posts/zombie-alert/</link>
+      <pubDate>Mon, 20 Feb 2017 14:51:18 -0300</pubDate>
+      
+      <guid>/posts/zombie-alert/</guid>
+      <description>In our previous post we found a way to UXSS (bypass the SOP policy) using the htmlFile/ActiveXObject, however, I mentioned that there were other interesting things to do using that same object. Have you tried anything? If yes, congratulations. The only way to find bugs is by trying, and today we are going to explore another interesting thing that can be done with the same ActiveXObject.
+Have you noted recently that all browsers have a feature to block perpetual alerts?</description>
+    </item>
+    
+    <item>
+      <title>SOP bypass / UXSS htmlFile in IFrame (IE)</title>
+      <link>/posts/uxss-ie-htmlfile/</link>
+      <pubDate>Mon, 06 Feb 2017 22:03:47 -0300</pubDate>
+      
+      <guid>/posts/uxss-ie-htmlfile/</guid>
+      <description>Today we are going to explore a feature that has been present on Internet Explorer almost since its inception. A feature that allows web-developers to instantiate external objects, and because of that it was abused ad-nauseum by attackers. Do you guess which feature are we talking about? The ActiveXObject.
+Even if these days it is restricted and we can’t happily render Excel spreadsheets anymore, there are still tons of things that can be done.</description>
+    </item>
+    
+    <item>
+      <title>SOP bypass / UXSS - Adventures in a Domainless World (Edge)</title>
+      <link>/posts/uxss-edge-domainless-world/</link>
+      <pubDate>Tue, 13 Dec 2016 12:56:37 -0300</pubDate>
+      
+      <guid>/posts/uxss-edge-domainless-world/</guid>
+      <description>Today we are going to walk around a few design issues that, when used together, will end up in a full SOP bypass or Universal Cross Site Scripting (UXSS) on Microsoft Edge. If you are not a security researcher but you still want to understand this vulnerability, think about it this way: visiting a malicious webpage an attacker will be able to read the cookies of your fav sites, change the content on the fly (on the client), sometimes even get personal information like saved usernames/passwords.</description>
+    </item>
+    
+    <item>
+      <title>Spoofing the address bar and the SmartScreen/Malware Warning (Edge)</title>
+      <link>/posts/spoof-addressbar-malware/</link>
+      <pubDate>Wed, 07 Dec 2016 13:34:22 -0300</pubDate>
+      
+      <guid>/posts/spoof-addressbar-malware/</guid>
+      <description>Update: this bug was patched on 2017-03-14 but we found a bypass the same day. Here it is: Bypassing the patch to continue spoofing the address bar and the Malware Warning.
+Over the last few months, we’ve seen a proliferation of these tech-support scams where users end up “locked” in their browsers with horrible red-screens and messages like “your computer may be at risk“. This is not new of course, but scammers are using more and more tricks to fool their victims.</description>
+    </item>
+    
+    <item>
+      <title>Abusing of Protocols to Load Local Files, bypass the HTML5 Sandbox and Open Popups (Edge)</title>
+      <link>/posts/abusing-of-protocols/</link>
+      <pubDate>Fri, 25 Nov 2016 19:35:08 -0300</pubDate>
+      
+      <guid>/posts/abusing-of-protocols/</guid>
+      <description>On October 25th, the fellows @MSEdgeDev twitted a link that called my attention because when I clicked on it (being on Chrome) the Windows Store App opened. It might not surprise you, but it surprised me!
+As far as I remembered, Chrome had this healthy habit of asking the user before opening external programs but in this case it opened directly, without warnings.
+This was different and caught my attention because I never accepted to open the Windows Store in Chrome.</description>
+    </item>
+    
+    <item>
+      <title>Bypassing Mixed Content Warnings - Loading Insecure Content in Secure Pages (Edge/IE)</title>
+      <link>/posts/loading-insecure-content-in-secure-pages/</link>
+      <pubDate>Tue, 15 Nov 2016 04:19:52 -0300</pubDate>
+      
+      <guid>/posts/loading-insecure-content-in-secure-pages/</guid>
+      <description>There are no doubts that the web is moving forward to HTTPS (secure) content. Most important names have today their certificates ready and their websites are in effect, secure. But have you ever wandered: secure to what extent? It’s clear that content served through HTTPS is protected from man in the middle (MITM) attacks, network sniffing/tampering and more. But, have you ever thought if the HTTPS protocol is protecting end users from something else?</description>
+    </item>
+    
+    <item>
+      <title>Detecting Local Files to Evade Analysts (IE)</title>
+      <link>/posts/detecting-local-files-to-evade-analysts/</link>
+      <pubDate>Tue, 18 Oct 2016 02:41:34 -0300</pubDate>
+      
+      <guid>/posts/detecting-local-files-to-evade-analysts/</guid>
+      <description>Last month we’ve been looking at how attackers were targeting unsavvy users by checking the associated mimeTypes to applications on the system. If the PC had analyst tools installed, something detected from withing the browser, then the malware refused to download the bad bits staying below the radars for a longer period of time. The vendor patched the bug but unfortunately bypassing it is quite easy by just combining what attackers already have.</description>
+    </item>
+    
+    <item>
+      <title>On Patching Security Bugs</title>
+      <link>/posts/on-patching-security-bugs/</link>
+      <pubDate>Sun, 02 Oct 2016 16:43:03 -0300</pubDate>
+      
+      <guid>/posts/on-patching-security-bugs/</guid>
+      <description>Hello fellow bug hunter!
+I want to share with you my thoughts on a slight change that the folks at Microsoft could embrace to make security better. This change, in my opinion, will make the security process more transparent for all, attracting bug hunters and making the lives of the bad guys more miserable, or at least less profitable.
+Personally, I think Microsoft is full of smart people with good intentions, but I disagree in many cases with their current way of treating security bugs so I expect a change, like the other big ones took long ago.</description>
+    </item>
+    
+    <item>
+      <title>Workers SOP Bypass importScripts and baseHref (Edge/IE)</title>
+      <link>/posts/workers-sop-bypass-importscripts-and-basehref/</link>
+      <pubDate>Tue, 27 Sep 2016 17:10:31 -0300</pubDate>
+      
+      <guid>/posts/workers-sop-bypass-importscripts-and-basehref/</guid>
+      <description>As we know, all browsers impose several restrictions when trying to access resources from different origins. Of course we can play music and render images coming from different domains but thanks to the Same Origin Policy, we will not be able to read the content of those resources. For example, we can draw an image on a canvas but can’t read its pixels using getImageData unless it is hosted on the same domain as main html.</description>
+    </item>
+    
+    <item>
+      <title>Detecting analysts before installing the malware (IE)</title>
+      <link>/posts/detecting-apps-mimetype-malware/</link>
+      <pubDate>Mon, 19 Sep 2016 04:30:26 -0300</pubDate>
+      
+      <guid>/posts/detecting-apps-mimetype-malware/</guid>
+      <description>With the help of a beautiful piece of code, malware authors can detect installed applications straight from within the browser and serve the bad bits only to unsavvy users. In other words, attackers target regular users by detecting specific analysts applications (like Fiddler) and serving their harmful program to users that do not have those apps installed. Essentially, their goal is to keep their malware under the radars for a longer period of time.</description>
+    </item>
+    
+    <item>
+      <title>Referer spoofing and defeating the XSS filter (Edge/IE)</title>
+      <link>/posts/referer-spoofing-defeating-xss-filter/</link>
+      <pubDate>Mon, 12 Sep 2016 03:02:33 -0300</pubDate>
+      
+      <guid>/posts/referer-spoofing-defeating-xss-filter/</guid>
+      <description>According to Wikipedia, “Referer spoofing is the sending of incorrect referer information in an HTTP request in order to prevent a website from obtaining accurate data on the identity of the web page previously visited by the user.”
+In other words, making a server think that requests are coming from anywhere we want.
+From: Manuel Caballero
+To: secure@microsoft.com
+Attachments: IE_EDGE_xss_filter_bypass.zip
+Hey fellas! Attached you have a working PoC with an XSS-Filter bypass […]</description>
+    </item>
+    
+    <item>
+      <title>CSS History Leak or I know where you have been (Edge)</title>
+      <link>/posts/css-history-leak/</link>
+      <pubDate>Mon, 05 Sep 2016 19:57:13 -0300</pubDate>
+      
+      <guid>/posts/css-history-leak/</guid>
+      <description>Hello fellow bug hunter!
+I’ve been thinking this morning on the classic trick originally discovered by Jeremiah Grossman back in 2006, where you could find out which sites were visited by the user. If you are not familiar with this beauty, I recommend you reading his original post. I will do my best to quickly explain, just in case. The following trick works on MS Edge, but I haven’t tried hard on other browsers.</description>
+    </item>
+    
+    <item>
+      <title>About</title>
+      <link>/posts/about/</link>
+      <pubDate>Sun, 28 Aug 2016 23:49:33 -0300</pubDate>
+      
+      <guid>/posts/about/</guid>
+      <description>I was born and grew up in Buenos Aires, Argentina, an amazing country full of wonderful people and probably the best food in the world. 🙂
+Skeptical researcher. My passion this millennium is called web-security and browser vulnerabilities. I love to poke into browsers and find security-bugs on my free time (which is never enough) because it’s just fun for me and of course, because I would like to help companies make a change.</description>
+    </item>
+    
+    <item>
+      <title>Grabbing data from Inputs and Textareas (Edge/IE)</title>
+      <link>/posts/grabdatafrominput/</link>
+      <pubDate>Sun, 28 Aug 2016 23:49:33 -0300</pubDate>
+      
+      <guid>/posts/grabdatafrominput/</guid>
+      <description>Both Microsoft Edge and Internet Explorer suffer from navigation problems, failing to keep up with the most updated history information. A framed navigation confuses these browsers and what seems to be a naive functionality problem ends up being a security bug: information disclosure across origins.
+Let’s first examine the functionality problem by building a page using just an &amp;lt;iframe&amp;gt;. Take a look at the code below: the iframe src points to first_page.</description>
+    </item>
+    
+  </channel>
+</rss>

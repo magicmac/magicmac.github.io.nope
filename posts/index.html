@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Posts | BrokenBrowser - Fun with browser vulnerabilities</title>
+<meta name="keywords" content="">
+<meta name="description" content="Posts - BrokenBrowser - Fun with browser vulnerabilities">
+<meta name="author" content="">
+<link rel="canonical" href="/posts/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.6a98292fb8fa8cf0f3ba4042d4b75515c04267550f3ad49ff6271b5af9562443.css" integrity="sha256-apgpL7j6jPDzukBC1LdVFcBCZ1UPOtSf9icbWvlWJEM=" rel="preload stylesheet" as="style">
+<link rel="icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="mask-icon" href="/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" type="application/rss+xml" href="/posts/index.xml">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Posts" />
+<meta property="og:description" content="" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="/posts/" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Posts"/>
+<meta name="twitter:description" content=""/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "/posts/"
+    }
+  ]
+}
+</script>
+</head>
+
+<body class="list" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="/" accesskey="h" title="BrokenBrowser - Fun with browser vulnerabilities (Alt + H)">BrokenBrowser - Fun with browser vulnerabilities</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main"> 
+<header class="page-header">
+  <h1>
+    Posts
+  </h1>
+</header>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>Revealing the content of the address bar (IE)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Hello fellow bug hunter! Today we are going back to Internet Explorer which despite getting old, tons people still use it. I am much happier with MSRC lately, they are really moving forward regarding Edge, design bugs, and they even extended its bug bounty, which seems to be permanent now.
+All those are good news, but I still believe it is not acceptable to leave IE wide open. For example, right now all IE users can be turned into bots with the zombie script bug (which has been public and unpatched for months)....</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-09-26 21:51:19 -0300 -03'>September 26, 2017</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to Revealing the content of the address bar (IE)" href="/posts/revealing-the-content-of-the-address-bar-ie/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>Patching Time Google Chrome vs Microsoft Edge
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>This week I’ve been trying to build code to detect a particular type of fraud. Basically, I needed the code to be hidden from a fraudster using Burp/Fiddler or the network tab in Chrome. The original idea was to load a JavaScript that was going be shown as a GIF/PNG with a sniffer, and this needed to work in Chrome. I was testing on Chrome Canary [60.0.3103.0] because I wanted to make sure the trick worked also in the next versions of Chrome....</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-05-19 11:40:50 -0300 -03'>May 19, 2017</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to Patching Time Google Chrome vs Microsoft Edge" href="/posts/p1555/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>Bugs List
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Below is the list of recently found bugs. Scroll to the right to access the links with the PoCs or if you prefer a better view go straight to the Google Docs Sheet: List of Vulnerabilities.
+If you find a bug has been fixed, please let me know. Thanks!</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-05-12 09:04:17 -0300 -03'>May 12, 2017</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to Bugs List" href="/posts/bugs-list/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>SOP bypass / UXSS - Stealing Credentials Pretty Fast (Edge)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Today we are going to steal Twitter and Facebook credentials from the user. The previous two SOP bypasses [1] [2] that allowed attackers to steal passwords and cookies were not patched in the latest update and this new one is more direct, easier and faster.
+Charles -our fictional hacked user- has obediently updated Windows last Tuesday and even changed his password, but he is not aware that the update did not fix the previous two issues (so he is still unprotected) and that there’s a new way to steal his most precious information....</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-05-10 16:12:23 -0300 -03'>May 10, 2017</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to SOP bypass / UXSS - Stealing Credentials Pretty Fast (Edge)" href="/posts/sop-bypass-uxss-stealing-credentials-pretty-fast/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>SOP bypass / UXSS - Tweeting like Charles Darwin (Edge)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Watch the 2 minutes exploit video where we manually tweet as if we were Charles Darwin, and get his password (thanks to the default password manager of Microsoft Edge). If you are out of time, watch the 1 minute video where we do the same thing, automatically.
+Charles Darwin is an example, this Microsoft Edge vulnerability allows the attacker to tweet or do anything (password anyone?) from many websites on behalf of the logged user....</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-04-24 09:44:46 -0300 -03'>April 24, 2017</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to SOP bypass / UXSS - Tweeting like Charles Darwin (Edge)" href="/posts/sop-bypass-uxss-tweeting-like-charles-darwin/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>SOP bypass courtesy of the reading mode (Edge)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>The Microsoft Edge team recently tweeted about the reading mode, a feature that removes the clutter from webpages to read without distractions. It was not new to me, I learned about it when I was trying to understand how pseudo-protocols worked on Edge but I never played with it before, until that tweet reminded me its existence. If you are in a hurry watch the video PoC, otherwise, read below....</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-04-17 09:06:58 -0300 -03'>April 17, 2017</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to SOP bypass courtesy of the reading mode (Edge)" href="/posts/sop-bypass-abusing-read-protocol/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>Detecting Installed Extensions (Edge)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Attackers love being able to fingerprint their victims. We’ve seen in the past two techniques that allowed the bad guys to detect the presence of particular files (to evade analysts) and even get the application names associated to specific mimeTypes. Microsoft patched those ones and other variations but today we are going to see how to detect browser extensions installed on Edge.
+Yesterday, Nataliia Bielova tweeted about a site that shows how extensions can be detected on different browsers, however, Microsoft Edge is excluded....</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-04-06 12:46:13 -0300 -03'>April 6, 2017</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to Detecting Installed Extensions (Edge)" href="/posts/microsoft-edge-detecting-installed-extensions/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>Defeating the popUp blocker, the XSS filter and SuperNavigate with our fake ticket to the Intranet Zone (Edge)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Last year we explored the domainless blank technique to create UXSS/SOP bypasses on both Microsoft Edge and Internet Explorer. The Edge version has been recently patched but unfortunately the fix introduces a new security issue which allows attackers to exploit other things. In other words, the patch kills a bug but creates another one*.*
+In a hurry? Watch the 35 sec video where we quickly show what can be done with this vulnerability....</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-03-31 19:19:01 -0300 -03'>March 31, 2017</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to Defeating the popUp blocker, the XSS filter and SuperNavigate with our fake ticket to the Intranet Zone (Edge)" href="/posts/free-ticket-to-the-intranet-zone/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>Referrer spoofing with iframe injection (Edge)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Last year we’ve been playing with a very simple method to spoof the referrer on Edge, which allowed us of course to spoof the referrer and -as a bonus- other neat things like bypass the XSS filter.
+Today I found out that it was patched, so I decided to give it a try and find a way around the patch. Honestly I don’t feel it’s a bypass but clearly a variation....</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-03-24 02:52:28 -0300 -03'>March 24, 2017</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to Referrer spoofing with iframe injection (Edge)" href="/posts/referer-spoofing-patch-bypass/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>SOP bypass / UXSS - More Adventures in a Domainless World (IE)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>A few months ago we’ve been playing with domainless about:blank pages on Edge. Essentially, a powerful about:blank document was capable of accessing every domain without restrictions. It was recently patched as CVE-2017-0002 so it does not work anymore. The same thing happens with the ActiveXObject/htmlFile (from now on, htmlFile) which was patched last week as CVE-2017-0154.
+If you haven’t read those two methods to achieve UXSS/SOP bypass, please do it now because what’s coming assumes that we are familiar with them....</p>
+  </div>
+  <footer class="entry-footer"><span title='2017-03-20 01:19:12 -0300 -03'>March 20, 2017</span>&nbsp;·&nbsp;magicmac</footer>
+  <a class="entry-link" aria-label="post link to SOP bypass / UXSS - More Adventures in a Domainless World (IE)" href="/posts/uxss-ie-domainless-world/"></a>
+</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="next" href="/posts/page/2/">Next&nbsp;&nbsp;»
+    </a>
+  </nav>
+</footer>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="/">BrokenBrowser - Fun with browser vulnerabilities</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+</body>
+
+</html>
