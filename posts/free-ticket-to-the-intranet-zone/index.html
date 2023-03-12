@@ -102,7 +102,7 @@ In a hurry? Watch the 35 sec video where we quickly show what can be done with t
     
   ],
   "articleBody": "Last year we explored the domainless blank technique to create UXSS/SOP bypasses on both Microsoft Edge and Internet Explorer. The Edge version has been recently patched but unfortunately the fix introduces a new security issue which allows attackers to exploit other things. In other words, the patch kills a bug but creates another one*.*\nIn a hurry? Watch the 35 sec video where we quickly show what can be done with this vulnerability.\nThe original problem was that domainless pages (about:blank URLs with empty document.domains) were essentially capable of accessing the DOM of any document-origin, but Microsoft patched this by adding a random domain (GUID) to them. In other words, the domainless blanks are not domainless anymore. They are always rendered with random domains like {53394a4f-8c04-46ab-94af-3ab86ffcfd4c}.\nWhile testing the patch I immediately stumbled upon this GUID-domain, so I changed my focus. The original goal was to analyze the patch and try to bypass it, but when that nice URL appeared in front of my face it reminded me IE zones which are to some extent inherited by Edge.\nIntranet vs Internet As you probably know, webpages running in the Intranet Zone have less restrictions than the ones in Internet. Edge has different mechanisms to distinguish when a page is being loaded from the Intranet vs Internet and the most notable is the dotless URL.\nAnyway, if we manage to fool Edge into thinking that our webpage is part of an Intranet, then we will be free to do stuff that wouldn’t be normally possible. Example? Disable the pop-up blocker, the XSS-filter, and even enable SuperNavigate: the capability of setting the location of iframes and windows that are not in our domain. We will see how powerful is this a bit later, but first, let’s see on IE what things are possible when we are in the Intranet Zone. I know we are speaking of Edge, but IE has this simple dialog in plain English which comes handy just to see which security features are disabled in Intranet Zone.\nWelcome to the Intranet Zone The screenshot above shows at least three interesting features the attacker can use if she has a ticket to the Intranet Zone. And it turns out the dotless GUID makes Edge think that we are in the Intranet Zone allowing us to bypass all those restrictions. So bug hunter, this will be super easy once we ride into the Intranet. Let’s do it!\nAlso, it is important to render the Flash inside an iframe, otherwise Edge will complain. But anyway, once the above happens we are in Intranet Zone. Let’s have fun now!\nAbusing of the Intranet Zone The following three PoCs will always use first the code described above to get into the Intranet Zone and then run the payloads below. Also, the payloads will be loaded from an external script so we can work more comfortably. I don’t like encoding tons of bytes in the data:URI. It confuses me!\nLet’s go with the PopUp blocker bypass. Be aware that once you click on the link below, it will open 5 popups without your interaction. The code works as if the pop-up blocker did not exist.\nfor (var i=0; i\u003c5; i++) { window.open(\"http://www.bing.com\",\"\",\"width=200,height=600\"); } [ Patched on 2017-05-09 ]\n[ Live PoC – Open 5 PopUps ] That was nice, now we can open pop-ups without restrictions or user interaction. What about the XSS filter? Let’s XSS my other site, caballero.com.ar.\nwindow.open(\"https://www.caballero.com.ar/echo.php?xss= I know it’s no big deal, but this little thing makes our prompt look like the real Twitter one. Just a detail.\nIf you want to analyze everything and play offline, grab all the PoCs together.\nHave a nice day! 🙂\nManuel.\n",
-  "wordCount" : "1027",
+  "wordCount" : "977",
   "inLanguage": "en",
   "datePublished": "2017-03-31T19:19:01-03:00",
   "dateModified": "2017-03-31T19:19:01-03:00",
@@ -197,7 +197,7 @@ In a hurry? Watch the 35 sec video where we quickly show what can be done with t
 <p>The screenshot above shows at least three interesting features the attacker can use if she has a ticket to the Intranet Zone. And it turns out <strong>the dotless GUID makes Edge think that we are in the Intranet Zone</strong> allowing us to bypass all those restrictions. So bug hunter, this will be super easy once we ride into the Intranet. Let’s do it!</p>
 <!-- raw HTML omitted -->
 <!-- raw HTML omitted -->
-<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false whitespace-before:1 whitespace-after:1 lang:xhtml decode:true&#34; title=&#34;Create GUID Domain&#34;&gt;&lt;iframe&gt;&lt;/iframe&gt;
+<pre tabindex="0"><code>&lt;iframe&gt;&lt;/iframe&gt;
 &lt;script&gt;
 window[0].location.replace(&#39;geturl.swf?TARGET=_top&amp;REDIR=data:,&#39;+
 &#39;&lt;script&gt;window.onload=function(){&#39;+
@@ -209,7 +209,7 @@ window[0].location.replace(&#39;geturl.swf?TARGET=_top&amp;REDIR=data:,&#39;+
 <h2 id="abusing-of-the-intranet-zone">Abusing of the Intranet Zone<a hidden class="anchor" aria-hidden="true" href="#abusing-of-the-intranet-zone">#</a></h2>
 <p>The following three PoCs will always use first the code described above to get into the Intranet Zone and then run the payloads below. Also, the payloads will be loaded from an external script so we can work more comfortably. I don’t like encoding tons of bytes in the data:URI. It confuses me!</p>
 <p>Let’s go with the PopUp blocker bypass. Be aware that once you click on the link below, it will open 5 popups without your interaction. The code works as if the pop-up blocker did not exist.</p>
-<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;Five popUps&#34;&gt;for (var i=0; i&lt;5; i++)
+<pre tabindex="0"><code>for (var i=0; i&lt;5; i++)
 {
    window.open(&#34;http://www.bing.com&#34;,&#34;&#34;,&#34;width=200,height=600&#34;);
 }
@@ -217,14 +217,14 @@ window[0].location.replace(&#39;geturl.swf?TARGET=_top&amp;REDIR=data:,&#39;+
 </a><strong>[ Patched on 2017-05-09 ]</strong></p>
 <h3 id="-live-poc--open-5-popupshttpswwwcrackingcomardemosintranetzonepop-">[ <a href="https://www.cracking.com.ar/demos/intranetzone/pop">Live PoC – Open 5 PopUps</a> ]<a hidden class="anchor" aria-hidden="true" href="#-live-poc--open-5-popupshttpswwwcrackingcomardemosintranetzonepop-">#</a></h3>
 <p>That was nice, now we can open pop-ups without restrictions or user interaction. What about the XSS filter? Let’s XSS my other site, caballero.com.ar.</p>
-<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;XSS Filter Bypass&#34;&gt;window.open(&#34;https://www.caballero.com.ar/echo.php?xss=&lt;script&gt;alert(document.domain)&lt;\/script&gt;&#34;,&#34;_self&#34;);
+<pre tabindex="0"><code>window.open(&#34;https://www.caballero.com.ar/echo.php?xss=&lt;script&gt;alert(document.domain)&lt;\/script&gt;&#34;,&#34;_self&#34;);
 </code></pre><p><strong>[ Patched on 2017-05-09 ]</strong></p>
 <h3 id="-live-poc--bypass-the-xss-filterhttpswwwcrackingcomardemosintranetzonexssbypass-">[ <a href="https://www.cracking.com.ar/demos/intranetzone/xssbypass/">Live PoC – Bypass the XSS Filter</a> ]<a hidden class="anchor" aria-hidden="true" href="#-live-poc--bypass-the-xss-filterhttpswwwcrackingcomardemosintranetzonexssbypass-">#</a></h3>
 <p>Great! Remember that these PoCs will work <strong>only</strong> if we are running in the Intranet Zone. In reality it’s not correct to call them “bypasses” because this is the default behavior in Intranet. We just set our zone to another one less restrictive and now we can freely play, that’s all. But let’s go with one more, the SuperNavigate one. Have you heard of it before? <!-- raw HTML omitted -->It allows the attacker to change the URL of any window/iframe regardless of its domain<!-- raw HTML omitted -->.</p>
 <p>Maybe that’s a bit confusing, let’s try with an example: it allows the attacker to change the URL of a twitter-iframe that is running on a different tab, and that tab could be there before us. In other words, we don’t even need to open Twitter tab. If the user has Twitter opened anywhere, we can actually interact with it. Wow! Let’s change the URL of an iframe named “twitter-iframe” which is rendered by Twitter. Want to see it live?</p>
 <p><a href="/wp-content/uploads/2017/03/04-twitter-supernavigate.png" title="Twitter SuperNavigate"><img loading="lazy" src="/2017/03/04-twitter-supernavigate.png" alt=""  />
 </a>OK, but let’s take a look at the code first.</p>
-<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:js decode:true&#34; title=&#34;SuperNavigate&#34;&gt;win  = window.open(&#34;https://www.twitter.com&#34;);
+<pre tabindex="0"><code>win  = window.open(&#34;https://www.twitter.com&#34;);
 
 function wait_for_tweet_post_iframe()
 {
@@ -244,7 +244,7 @@ interval = setInterval(wait_for_tweet_post_iframe, 500);
 <p><img loading="lazy" src="/2017/03/05-cracking-prompt.png" alt=""  />
 </p>
 <p>As shown above, a regular prompt will show its domain-origin, however, there’s a very simple trick that removes that information: execute the prompt from an about:blank iframe. That’s enough to “clean” the domain from the prompt.</p>
-<pre tabindex="0"><code>&lt;pre class=&#34;theme:vs2012-black toolbar:2 nums:false nums-toggle:false whitespace-before:1 whitespace-after:1 lang:xhtml decode:true&#34; title=&#34;Prompt NoDomain&#34;&gt;&lt;iframe&gt;&lt;/iframe&gt;
+<pre tabindex="0"><code>&lt;iframe&gt;&lt;/iframe&gt;
 &lt;script&gt;
 window[0].prompt(&#34;No domain shown&#34;);
 &lt;/script&gt;

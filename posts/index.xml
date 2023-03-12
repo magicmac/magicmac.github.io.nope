@@ -237,16 +237,6 @@ I’ve been thinking this morning on the classic trick originally discovered by 
     </item>
     
     <item>
-      <title>About</title>
-      <link>/posts/about/</link>
-      <pubDate>Sun, 28 Aug 2016 23:49:33 -0300</pubDate>
-      
-      <guid>/posts/about/</guid>
-      <description>I was born and grew up in Buenos Aires, Argentina, an amazing country full of wonderful people and probably the best food in the world. 🙂
-Skeptical researcher. My passion this millennium is called web-security and browser vulnerabilities. I love to poke into browsers and find security-bugs on my free time (which is never enough) because it’s just fun for me and of course, because I would like to help companies make a change.</description>
-    </item>
-    
-    <item>
       <title>Grabbing data from Inputs and Textareas (Edge/IE)</title>
       <link>/posts/grabdatafrominput/</link>
       <pubDate>Sun, 28 Aug 2016 23:49:33 -0300</pubDate>
